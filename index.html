@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-theme="light">
+<html lang="zh-CN" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -48,22 +48,25 @@
     }
 
     [data-theme="dark"] {
-      --bg:        #0d0f14;
-      --surface:   #151922;
-      --surface2:  #1a1f2a;
-      --border:    #252d3d;
-      --border2:   #1e2535;
-      --text:      #dfe3ec;
-      --text2:     #8a96ad;
-      --text3:     #4e5a72;
+      /* 与首页背景对齐：#050709 + 少量提亮保证内容可读性 */
+      --bg:        #080a0f;
+      --surface:   #0f1219;
+      --surface2:  #141820;
+      --border:    #1e2535;
+      --border2:   #181e2c;
+      /* "永久"的米白色 → 主文字 */
+      --text:      #e8e0d0;
+      --text2:     #9098b0;
+      --text3:     #48536a;
+      /* "牛市"的金色 → accent */
       --accent:    #c49a52;
       --accent2:   #dbb368;
       --accent-bg: rgba(196,154,82,0.09);
-      --chart-bg:  #070a10;
-      --chart-bg2: #0a0e17;
-      --chart-bd:  #101828;
-      --shadow:    0 1px 4px rgba(0,0,0,0.4), 0 4px 16px rgba(0,0,0,0.3);
-      --shadow-lg: 0 2px 8px rgba(0,0,0,0.5), 0 8px 32px rgba(0,0,0,0.35);
+      --chart-bg:  #050709;
+      --chart-bg2: #080a10;
+      --chart-bd:  #0e1520;
+      --shadow:    0 1px 4px rgba(0,0,0,0.5), 0 4px 16px rgba(0,0,0,0.4);
+      --shadow-lg: 0 2px 8px rgba(0,0,0,0.6), 0 8px 32px rgba(0,0,0,0.45);
     }
 
     /* ══ RESET ══════════════════════════════════════════════════════════════ */
@@ -2980,7 +2983,7 @@ function toggleTheme() {
 }
 
 function loadTheme() {
-  const saved = localStorage.getItem('life_picture_theme') || 'light';
+  const saved = localStorage.getItem('life_picture_theme') || 'dark';
   document.documentElement.setAttribute('data-theme', saved);
   const btn = document.getElementById('theme-btn');
   if (btn) btn.textContent = saved === 'dark' ? '☀️' : '🌙';

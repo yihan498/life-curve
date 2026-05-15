@@ -1480,12 +1480,17 @@
       </div>
 
       <hr class="divider">
-      <div class="section-subtitle">导入 / 导出</div>
+      <div class="section-subtitle">本地保存与备份</div>
+      <p style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.65;">
+        ⚠️ 数据存在浏览器缓存中，清除缓存或换设备会丢失。请<strong style="color:var(--text2)">定期导出到本地</strong>。
+      </p>
       <div class="export-row">
-        <button class="btn btn-secondary btn-sm" onclick="exportJSON()">导出 JSON</button>
-        <button class="btn btn-secondary btn-sm" onclick="importJSON()">导入 JSON</button>
-        <button class="btn btn-ghost btn-sm" onclick="resetAll()" style="color:#c64;">重置默认</button>
+        <button class="btn btn-primary btn-sm" onclick="exportMarkdown()">📄 导出报告（Markdown）</button>
+        <button class="btn btn-secondary btn-sm" onclick="exportJSON()">💾 完整备份（JSON）</button>
+        <button class="btn btn-secondary btn-sm" onclick="importJSON()">📂 导入还原</button>
+        <button class="btn btn-ghost btn-sm" onclick="resetAll()" style="color:#c64;">重置</button>
       </div>
+      <p style="font-size:11px;color:var(--text3);margin-top:8px;">Markdown 可直接在 Notion、Obsidian、任何文本编辑器中打开 · 建议每季度存一份</p>
       <input type="file" id="import-file" accept=".json" style="display:none;" onchange="handleImport(event)">
     </div>
 
@@ -2423,6 +2428,125 @@ function renderSnapshots() {
 }
 
 /* ══ EXPORT / IMPORT ════════════════════════════════════════════════════════ */
+
+function exportMarkdown() {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+  const STAGES = {
+    edu: '📚 学习积累期', explore: '🔍 探索尝试期', growth: '📈 快速成长期',
+    peak: '🚀 巅峰突破期', compound: '💰 复利收获期', stable: '🏔 稳定传承期'
+  };
+
+  // Compute current curve values
+  const curveData = calcAllCurves();
+  const ci = Math.max(0, Math.min(S.currentAge - MIN_AGE, AGES.length - 1));
+  const curveNames = { employ: '传统就业', pulse: '创业脉冲', serial: '连续创业', ai: 'AI 协作', capital: '资本复利', composite: '复合叠加' };
+  const curveVals = {};
+  for (const k of Object.keys(curveNames)) {
+    curveVals[k] = Math.round((curveData[k] || [])[ci] || 0);
+  }
+
+  // Check bull
+  const bullResult = checkBullMarket();
+  const bull = bullResult.bull;
+
+  const lines = [];
+
+  // Header
+  lines.push(`# 人生曲线 · 记录报告`);
+  lines.push(`\n> 导出时间：${dateStr}  ·  年龄：${S.currentAge} 岁  ·  阶段：${STAGES[S.stage] || S.stage}\n`);
+  lines.push(`---\n`);
+
+  // Status
+  lines.push(`## 当前状态\n`);
+  lines.push(`| 指标 | 数值 |`);
+  lines.push(`|------|------|`);
+  lines.push(`| 当前年龄 | ${S.currentAge} 岁 |`);
+  lines.push(`| 人生阶段 | ${STAGES[S.stage] || S.stage} |`);
+  lines.push(`| 永久牛市 | ${bull ? '✅ 达成（每个低点高于上一个）' : '⚠️ 未达标（需调整策略）'} |`);
+  lines.push(`| 复合叠加指数 | ${curveVals.composite} / 100 |`);
+  lines.push(``);
+
+  // Curve values
+  lines.push(`## 各维度生命力指数（满分 100）\n`);
+  lines.push(`| 维度 | 当前值 | 状态 |`);
+  lines.push(`|------|--------|------|`);
+  const getBar = v => '█'.repeat(Math.round(v/10)) + '░'.repeat(10 - Math.round(v/10));
+  for (const [k, name] of Object.entries(curveNames)) {
+    if (k === 'composite') continue;
+    const v = curveVals[k];
+    const status = v >= 70 ? '强' : v >= 40 ? '中' : v >= 10 ? '弱' : '未启动';
+    lines.push(`| ${name} | ${v} | ${getBar(v)} ${status} |`);
+  }
+  lines.push(``);
+
+  // Params summary
+  lines.push(`## 参数设置摘要\n`);
+  const p = S.params;
+  lines.push(`**传统就业**：${p.employ.startAge}岁开始 → ${p.employ.peakAge}岁巅峰 → ${p.employ.retireAge}岁退休 · 强度 ${p.employ.str}%`);
+  lines.push(`\n**创业脉冲**：${p.pulse.startAge}岁起步 · ${p.pulse.cnt}次尝试 · 成功率 ${p.pulse.rate}% · 强度 ${p.pulse.str}%`);
+  lines.push(`\n**连续创业**：${p.serial.startAge}岁启动 · ${p.serial.cyc}个周期 · 每期${p.serial.len}年 · 峰值强度 ${p.serial.str}%`);
+  lines.push(`\n**AI 协作**：${p.ai.startAge}岁采用 · 跃迁量 ${p.ai.jump}% · 协作深度 ${p.ai.depth}% · 年增长 ${p.ai.grow}%`);
+  lines.push(`\n**资本复利**：${p.capital.startAge}岁开始 · 初始资本 ${p.capital.init}% · 年化 ${p.capital.rate}% · 年追加 ${p.capital.add}%`);
+  lines.push(``);
+
+  // Milestones
+  lines.push(`---\n`);
+  lines.push(`## 人生里程碑\n`);
+  if (S.milestones && S.milestones.length > 0) {
+    const sorted = [...S.milestones].sort((a, b) => a.age - b.age);
+    for (const m of sorted) {
+      const status = m.done ? '✅' : (m.age <= S.currentAge ? '⏳' : '◯');
+      lines.push(`- ${status} **${m.age} 岁** ${m.text}${m.note ? `\n  > ${m.note}` : ''}`);
+    }
+  } else {
+    lines.push(`_暂无里程碑_`);
+  }
+  lines.push(``);
+
+  // Journal
+  lines.push(`---\n`);
+  lines.push(`## 日志记录（共 ${(S.journal || []).length} 条）\n`);
+  if (S.journal && S.journal.length > 0) {
+    const sorted = [...S.journal].sort((a, b) => new Date(b.date) - new Date(a.date));
+    for (const entry of sorted) {
+      const d = new Date(entry.date);
+      const ds = d.toLocaleDateString('zh-CN', { year: 'numeric', month: 'short', day: 'numeric' });
+      lines.push(`### ${ds}（${entry.age} 岁）\n`);
+      lines.push(`${entry.text}\n`);
+    }
+  } else {
+    lines.push(`_暂无日志_`);
+  }
+
+  // Snapshots
+  if (S.snapshots && S.snapshots.length > 0) {
+    lines.push(`---\n`);
+    lines.push(`## 历史快照（共 ${S.snapshots.length} 条）\n`);
+    lines.push(`| 快照名称 | 保存时间 | 年龄 |`);
+    lines.push(`|----------|----------|------|`);
+    for (const snap of S.snapshots) {
+      const d = new Date(snap.date).toLocaleDateString('zh-CN');
+      lines.push(`| ${snap.name} | ${d} | ${snap.currentAge} 岁 |`);
+    }
+    lines.push(``);
+  }
+
+  // Footer
+  lines.push(`---\n`);
+  lines.push(`_由「人生曲线」工具生成 · https://yihan498.github.io/life-curve/_`);
+
+  const md = lines.join('\n');
+  const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `人生曲线报告_${now.toISOString().slice(0,10)}.md`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Markdown 报告已导出', 'success');
+}
+
 function exportJSON() {
   const blob = new Blob([JSON.stringify(S, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);

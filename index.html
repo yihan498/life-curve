@@ -718,7 +718,19 @@
       letter-spacing: 0.1em;
       text-transform: uppercase;
       margin-bottom: 14px;
+      cursor: grab;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
+    .sp-title::before {
+      content: '⠿';
+      font-size: 12px;
+      opacity: 0.4;
+    }
+    .sp-title:active { cursor: grabbing; }
+    .strength-panel.dragging { opacity: 0.9; transition: none !important; }
 
     .sp-row {
       display: flex;
@@ -2989,6 +3001,42 @@ function loadTheme() {
   if (btn) btn.textContent = saved === 'dark' ? '☀️' : '🌙';
 }
 
+/* ══ DRAGGABLE PANEL ════════════════════════════════════════════════════════ */
+function initDraggable() {
+  const panel = document.querySelector('.strength-panel');
+  const handle = panel.querySelector('.sp-title');
+  let dragging = false, ox = 0, oy = 0;
+
+  handle.addEventListener('mousedown', e => {
+    dragging = true;
+    panel.classList.add('dragging');
+    // 切换到绝对位置（脱离 right/top 约束）
+    const rect = panel.getBoundingClientRect();
+    const parentRect = panel.offsetParent.getBoundingClientRect();
+    panel.style.right  = 'auto';
+    panel.style.left   = (rect.left - parentRect.left) + 'px';
+    panel.style.top    = (rect.top  - parentRect.top)  + 'px';
+    ox = e.clientX - rect.left;
+    oy = e.clientY - rect.top;
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    const parentRect = panel.offsetParent.getBoundingClientRect();
+    const maxX = parentRect.width  - panel.offsetWidth;
+    const maxY = parentRect.height - panel.offsetHeight;
+    panel.style.left = Math.max(0, Math.min(maxX, e.clientX - parentRect.left - ox)) + 'px';
+    panel.style.top  = Math.max(0, Math.min(maxY, e.clientY - parentRect.top  - oy)) + 'px';
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (!dragging) return;
+    dragging = false;
+    panel.classList.remove('dragging');
+  });
+}
+
 /* ══ INIT ═══════════════════════════════════════════════════════════════════ */
 function init() {
   loadSaved();
@@ -3013,6 +3061,7 @@ function init() {
 
   loadTheme();
   initLandingCanvas();
+  initDraggable();
   // Show today page (behind landing overlay)
   goPage('today');
 }

@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js" onerror="window._annotationFailed=true"></script>
 
   <style>
     /* ── TOKENS ─────────────────────────────────────────── */
@@ -129,6 +129,7 @@
       display: grid;
       grid-template-columns: var(--sidebar) 1fr var(--panel);
       overflow: hidden;
+      height: calc(100vh - 54px);
     }
 
     /* ── SIDEBAR ─────────────────────────────────────────── */
@@ -949,7 +950,38 @@ function buildDatasets() {
 
 function initChart() {
   const ctx = document.getElementById('chart').getContext('2d');
-  Chart.register(ChartjsPluginAnnotation);
+
+  // Defensive plugin registration — UMD global name varies by version
+  const annotationPlugin =
+    window.ChartjsPluginAnnotation ||
+    window['chartjs-plugin-annotation'] ||
+    window.ChartAnnotation;
+  if (annotationPlugin) {
+    try { Chart.register(annotationPlugin); } catch(e) { /* already registered */ }
+  }
+
+  // Annotation config — only add if plugin loaded
+  const annotationCfg = annotationPlugin ? {
+    annotations: {
+      nowLine: {
+        type: 'line',
+        xMin: S.currentAge,
+        xMax: S.currentAge,
+        borderColor: 'rgba(255,107,53,0.75)',
+        borderWidth: 1.5,
+        borderDash: [5, 4],
+        label: {
+          content: `NOW`,
+          display: true,
+          position: 'start',
+          backgroundColor: 'rgba(255,107,53,0.18)',
+          color: '#ff6b35',
+          font: { family: 'JetBrains Mono', size: 10, weight: '500' },
+          padding: { x: 7, y: 3 }
+        }
+      }
+    }
+  } : {};
 
   chart = new Chart(ctx, {
     type: 'line',
@@ -977,27 +1009,7 @@ function initChart() {
               : ` ${item.dataset.label}  ${Math.round(item.raw)}`
           }
         },
-        annotation: {
-          annotations: {
-            nowLine: {
-              type: 'line',
-              xMin: S.currentAge,
-              xMax: S.currentAge,
-              borderColor: 'rgba(255,107,53,0.7)',
-              borderWidth: 1.5,
-              borderDash: [5, 4],
-              label: {
-                content: `NOW`,
-                display: true,
-                position: 'start',
-                backgroundColor: 'rgba(255,107,53,0.18)',
-                color: '#ff6b35',
-                font: { family: 'JetBrains Mono', size: 10, weight: '500' },
-                padding: { x: 7, y: 3 }
-              }
-            }
-          }
-        }
+        annotation: annotationCfg
       },
       scales: {
         x: {
@@ -1027,8 +1039,11 @@ function refreshChart() {
   if (!chart) return;
   buildAllData();
   chart.data.datasets = buildDatasets();
-  const ann = chart.options.plugins.annotation.annotations.nowLine;
-  ann.xMin = ann.xMax = S.currentAge;
+  // Update annotation line if plugin is active
+  try {
+    const ann = chart.options.plugins.annotation?.annotations?.nowLine;
+    if (ann) { ann.xMin = ann.xMax = S.currentAge; }
+  } catch(e) { /* annotation plugin not available */ }
   chart.update();
   refreshMetrics();
 }

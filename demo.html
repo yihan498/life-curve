@@ -241,33 +241,32 @@
     }
 
     /* ── FIVE CURVES ── */
-    #curves { background: #050709; }
+    #curves { background: #050709; min-height: auto; padding-bottom: 100px; }
 
     .curves-intro {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 64px;
-      align-items: center;
+      gap: 32px;
+      align-items: start;
       margin-bottom: 64px;
     }
 
-    .curve-list { display: flex; flex-direction: column; gap: 14px; }
+    .curve-list { display: flex; flex-direction: column; gap: 10px; }
 
     .curve-row {
-      display: grid;
-      grid-template-columns: 14px 100px 1fr;
-      gap: 14px;
+      display: flex;
       align-items: center;
+      gap: 14px;
       padding: 14px 18px;
       background: rgba(255,255,255,0.02);
-      border: 1px solid rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.05);
       border-radius: 8px;
       cursor: pointer;
       transition: all 0.2s;
     }
     .curve-row:hover, .curve-row.active {
-      background: rgba(196,154,82,0.05);
-      border-color: rgba(196,154,82,0.2);
+      background: rgba(196,154,82,0.06);
+      border-color: rgba(196,154,82,0.25);
     }
 
     .curve-dot {
@@ -275,20 +274,35 @@
       border-radius: 50%;
       flex-shrink: 0;
     }
+    .curve-row-text { flex: 1; min-width: 0; }
     .curve-name { font-size: 13.5px; font-weight: 500; color: var(--text); }
     .curve-tagline { font-size: 12px; color: var(--text2); margin-top: 2px; }
 
-    .curve-arrow { font-size: 11px; color: var(--text3); margin-left: auto; }
+    .curve-arrow {
+      font-size: 14px; color: var(--text3);
+      flex-shrink: 0;
+      transition: color 0.2s, transform 0.2s;
+    }
+    .curve-row.active .curve-arrow { color: var(--gold); transform: translateX(3px); }
 
     .curve-detail-panel {
-      position: sticky; top: 80px;
+      position: sticky; top: 76px;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 28px;
+      padding: 24px;
+      align-self: start;
     }
 
-    .cdp-curve { height: 120px; margin-bottom: 20px; }
+    .cdp-curve-wrap {
+      width: 100%; height: 130px;
+      margin-bottom: 20px;
+      position: relative;
+    }
+    .cdp-curve-wrap canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
 
     .cdp-name {
       font-family: var(--font-d);
@@ -674,40 +688,40 @@
       <div>
         <div class="curve-list" id="curve-list">
           <div class="curve-row active" data-curve="employ" onclick="selectCurve('employ')">
-            <div class="curve-dot" style="background:var(--c-employ);box-shadow:0 0 6px var(--c-employ)88;"></div>
-            <div>
+            <div class="curve-dot" style="background:#4a8fa8;box-shadow:0 0 7px #4a8fa888;"></div>
+            <div class="curve-row-text">
               <div class="curve-name">传统就业</div>
               <div class="curve-tagline">低保 · 白嫖保险</div>
             </div>
             <span class="curve-arrow">›</span>
           </div>
           <div class="curve-row" data-curve="pulse" onclick="selectCurve('pulse')">
-            <div class="curve-dot" style="background:var(--c-pulse);box-shadow:0 0 6px var(--c-pulse)88;"></div>
-            <div>
+            <div class="curve-dot" style="background:#c9614a;box-shadow:0 0 7px #c9614a88;"></div>
+            <div class="curve-row-text">
               <div class="curve-name">创业脉冲</div>
               <div class="curve-tagline">ECG突破 · 高波动高潜力</div>
             </div>
             <span class="curve-arrow">›</span>
           </div>
           <div class="curve-row" data-curve="serial" onclick="selectCurve('serial')">
-            <div class="curve-dot" style="background:var(--c-serial);box-shadow:0 0 6px var(--c-serial)88;"></div>
-            <div>
+            <div class="curve-dot" style="background:#5a8f6a;box-shadow:0 0 7px #5a8f6a88;"></div>
+            <div class="curve-row-text">
               <div class="curve-name">连续创业</div>
               <div class="curve-tagline">7年周期 · 底板递升</div>
             </div>
             <span class="curve-arrow">›</span>
           </div>
           <div class="curve-row" data-curve="ai" onclick="selectCurve('ai')">
-            <div class="curve-dot" style="background:var(--c-ai);box-shadow:0 0 6px var(--c-ai)88;"></div>
-            <div>
+            <div class="curve-dot" style="background:#8b62c4;box-shadow:0 0 7px #8b62c488;"></div>
+            <div class="curve-row-text">
               <div class="curve-name">AI 协作</div>
               <div class="curve-tagline">能力跃迁 · 越用越强</div>
             </div>
             <span class="curve-arrow">›</span>
           </div>
           <div class="curve-row" data-curve="capital" onclick="selectCurve('capital')">
-            <div class="curve-dot" style="background:var(--c-capital);box-shadow:0 0 6px var(--c-capital)88;"></div>
-            <div>
+            <div class="curve-dot" style="background:#b08040;box-shadow:0 0 7px #b0804088;"></div>
+            <div class="curve-row-text">
               <div class="curve-name">资本复利</div>
               <div class="curve-tagline">永久托底 · 抹平波动</div>
             </div>
@@ -718,7 +732,9 @@
 
       <!-- Right: detail panel -->
       <div class="curve-detail-panel" id="curve-detail">
-        <canvas id="curve-mini-chart" class="cdp-curve"></canvas>
+        <div class="cdp-curve-wrap">
+          <canvas id="curve-mini-chart"></canvas>
+        </div>
         <div class="cdp-name" id="cdp-name">传统就业</div>
         <div class="cdp-role" id="cdp-role">TRADITIONAL EMPLOYMENT</div>
         <div class="cdp-desc" id="cdp-desc"></div>
@@ -996,6 +1012,11 @@ function selectCurve(key) {
   if (miniChart) { miniChart.destroy(); miniChart = null; }
 
   const canvas = document.getElementById('curve-mini-chart');
+  // Chart.js needs explicit pixel size; read from wrapper
+  const wrap = canvas.parentElement;
+  canvas.width  = wrap.offsetWidth  || 300;
+  canvas.height = wrap.offsetHeight || 130;
+
   miniChart = new Chart(canvas, {
     type: 'line',
     data: {
@@ -1011,8 +1032,8 @@ function selectCurve(key) {
       }]
     },
     options: {
-      animation: { duration: 500 },
-      responsive: true,
+      animation: { duration: 400 },
+      responsive: false,
       maintainAspectRatio: false,
       plugins: { legend: { display: false }, tooltip: { enabled: false } },
       scales: {

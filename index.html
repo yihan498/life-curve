@@ -1563,7 +1563,7 @@ const DEFAULTS = () => ({
   stage: 'explore',
   enabled: { employ: true, pulse: true, serial: true, ai: true, capital: true, composite: true },
   params: {
-    employ:  { startAge: 22, peakAge: 35, retireAge: 60, str: 70 },
+    employ:  { startAge: 22, peakAge: 40, retireAge: 60, str: 70 },
     pulse:   { startAge: 20, cnt: 12, rate: 30, str: 75 },
     serial:  { startAge: 20, cyc: 4, len: 7, str: 85 },
     ai:      { startAge: 24, jump: 60, depth: 65, grow: 5 },
@@ -1620,105 +1620,79 @@ function smoothstep(t) {
 }
 
 function calcEmploy(p, ages) {
-  // 传统就业：上班族曲线。入职后线性升至巅峰（约35岁），再线性降至退休归零。
-  // 退休后硬归零——就业是"低保"不是遗产，资本才托底。
-  const peak = 72 * (p.str / 100);
+  const s = p.str / 100;
   return ages.map(age => {
     if (age < p.startAge) return 0;
     if (age <= p.peakAge) {
       const t = (age - p.startAge) / (p.peakAge - p.startAge || 1);
-      return peak * t; // 线性上升
+      return 72 * s * smoothstep(t);
     }
     if (age <= p.retireAge) {
       const t = (age - p.peakAge) / (p.retireAge - p.peakAge || 1);
-      return peak * (1 - t); // 线性下降
+      return 72 * s * (1 - 0.32 * Math.pow(t, 1.3));
     }
-    return 0; // 退休后归零
+    return 72 * s * 0.15 * Math.exp(-0.18 * (age - p.retireAge));
   });
 }
 
 function calcPulse(p, ages) {
-  // 创业脉冲：ECG心跳模式。
-  // 失败尝试：快速冲上去快速跌落，小幅度(8-15)，窄脉宽(0.2-0.4yr)
-  // 成功尝试：快速冲上去，缓慢回落，大幅度(50-80)，宽脉宽(1-2yr)
-  // 上升沿陡（0.15yr），下降沿根据成败决定宽度——不对称Gaussian
   const pulses = [];
-  const span = Math.min(35, 75 - p.startAge);
-  const avgGap = span / Math.max(p.cnt, 1);
-  let t = p.startAge + avgGap * 0.3;
-  // 用固定种子确保同参数下图形稳定
-  const seed = p.startAge * 7 + p.cnt * 13;
-  const rand = (i, salt) => Math.abs(Math.sin(seed + i * 17.3 + salt * 5.7));
+  const span = Math.min(32, 75 - p.startAge);
+  const avgGap = span / p.cnt;
+  let t = p.startAge;
   for (let i = 0; i < p.cnt; i++) {
-    const gap = avgGap * (0.6 + 0.8 * rand(i, 1));
-    t += gap;
+    const j = 0.25 + 0.75 * Math.abs(Math.sin(i * PHI + p.startAge * 0.2));
+    t += avgGap * j * 0.68;
     if (t > 78) break;
-    const ok = rand(i, 2) < (p.rate / 100);
+    const ok = Math.abs(Math.sin(i * 2.39 + 1.1)) < (p.rate / 100);
     const amp = ok
-      ? (50 + 30 * rand(i, 3)) * (p.str / 100)   // 成功：大幅
-      : (8  + 10 * rand(i, 4)) * (p.str / 100);   // 失败：小幅
-    const riseW = 0.15;                             // 上升沿都很陡
-    const fallW = ok ? 1.2 + 0.8 * rand(i, 5) : 0.25 + 0.15 * rand(i, 5); // 成功缓落，失败速落
-    pulses.push({ c: t, amp, riseW, fallW });
+      ? (48 + 32 * Math.abs(Math.sin(i * 0.73))) * (p.str / 100)
+      : (7 + 10 * Math.abs(Math.sin(i * 1.27))) * (p.str / 100);
+    const w = ok ? 0.65 + 0.3 * Math.abs(Math.sin(i)) : 0.28;
+    pulses.push({ c: t, amp, w });
   }
   return ages.map(age => {
     let v = 0;
     for (const px of pulses) {
-      const dt = age - px.c;
-      let contrib = 0;
-      if (dt < 0) {
-        // 上升沿（提前）
-        const d = -dt / px.riseW;
-        contrib = px.amp * Math.exp(-2 * d * d);
-      } else {
-        // 下降沿（延后）
-        const d = dt / px.fallW;
-        contrib = px.amp * Math.exp(-1.5 * d * d);
-      }
-      v = Math.max(v, contrib);
+      const d = Math.abs(age - px.c) / px.w;
+      if (d < 3.5) v = Math.max(v, px.amp * Math.exp(-2 * d * d));
     }
     return v;
   });
 }
 
 function calcSerial(p, ages) {
-  // 连续创业：严格7年周期，每轮新底板 > 上一轮底板（"越签越高"）
-  // 每轮：前2年探索（从底板缓慢爬升）→ 中间高速增长 → 末期短暂回落到新底板
-  // 新底板 = 上一轮峰值的30-45%，严格递增
-  const MAX = 90 * (p.str / 100);
+  const MAX = 92 * (p.str / 100);
   const steps = [];
-  let floor = 2, t = p.startAge; // 从极低点起步
+  let floor = 0, t = p.startAge;
   for (let i = 0; i < p.cyc; i++) {
     const prog = (i + 1) / p.cyc;
-    const peak = MAX * (0.25 + 0.75 * Math.pow(prog, 0.7)); // 每轮峰值递增
-    const explore = p.len * 0.28;   // 探索期
-    const earn    = p.len * 0.52;   // 收益期
-    // 新底板：严格高于当前底板，取峰值35%和(floor+8)的较大值
-    const newFloor = Math.max(floor + 5, peak * 0.35);
-    steps.push({ t0: t, t1: t + explore, t2: t + explore + earn, t3: t + p.len, floor, peak, newFloor });
-    floor = newFloor;
+    const peak = MAX * Math.pow(prog, 0.65);
+    const nextFloor = Math.max(floor, peak * 0.20 * (i + 1) / p.cyc * 1.5);
+    steps.push({
+      t0: t, t1: t + p.len * 0.3,
+      t2: t + p.len * 0.68, t3: t + p.len,
+      floor, peak, nextFloor,
+    });
+    floor = nextFloor;
     t += p.len;
   }
   if (steps.length === 0) return ages.map(() => 0);
   const last = steps[steps.length - 1];
   return ages.map(age => {
     if (age < steps[0].t0) return 0;
-    if (age >= last.t3) return last.newFloor; // 最终稳定在高底板
+    if (age >= last.t3) {
+      const ex = (age - last.t3) / 10;
+      return Math.min(MAX, last.nextFloor + (last.peak - last.nextFloor) * (0.72 + 0.08 * Math.min(ex, 1)));
+    }
     for (const s of steps) {
       if (age >= s.t0 && age < s.t3) {
         if (age <= s.t1) {
-          // 探索期：从底板缓慢爬升
-          const t2 = (age - s.t0) / (s.t1 - s.t0 || 1);
-          return s.floor + (s.peak * 0.55 - s.floor) * smoothstep(t2);
+          return s.floor + (s.peak - s.floor) * smoothstep((age - s.t0) / (s.t1 - s.t0 || 1));
         } else if (age <= s.t2) {
-          // 收益期：高速攀升至峰值，小幅震荡
-          const t2 = (age - s.t1) / (s.t2 - s.t1 || 1);
-          const base = s.peak * 0.55 + (s.peak - s.peak * 0.55) * smoothstep(t2);
-          return base + Math.sin((age - s.t1) * 3.5) * s.peak * 0.018;
+          return s.peak * 0.97 + Math.sin((age - s.t1) * 5) * s.peak * 0.02;
         } else {
-          // 过渡期：从峰值回落至新底板
-          const t2 = (age - s.t2) / (s.t3 - s.t2 || 1);
-          return s.peak + (s.newFloor - s.peak) * smoothstep(t2);
+          return s.peak * 0.97 + (s.nextFloor - s.peak * 0.97) * smoothstep((age - s.t2) / (s.t3 - s.t2 || 1));
         }
       }
     }
@@ -1727,46 +1701,26 @@ function calcSerial(p, ages) {
 }
 
 function calcAI(p, ages) {
-  // AI协作：采用后近乎垂直跃升（0.4年内到达初始高度），然后线性持续增长
-  // 跃升幅度由jump参数决定，增长斜率由depth（协作深度）决定
-  const jumpHeight = (p.jump / 100) * 55; // 初始跃迁高度（最高55分）
-  const growthRate = (p.depth / 100) * 2.8; // 年增长速率（满深度≈2.8/年）
   return ages.map(age => {
     if (age < p.startAge) return 0;
     const t = age - p.startAge;
-    // 近垂直跃升：用极陡sigmoid，0.4年内完成80%跃升
-    const jumpFrac = 1 / (1 + Math.exp(-12 * (t - 0.2)));
-    const jumpVal = jumpHeight * jumpFrac;
-    // 跃升后线性增长
-    const growthVal = growthRate * Math.max(0, t - 0.4);
-    return Math.min(98, jumpVal + growthVal);
+    const sig = 1 / (1 + Math.exp(-5 * (t - 0.5)));
+    const initial = (p.jump / 100) * 58 * sig;
+    const growth = (p.depth / 100) * (p.grow / 10) * t * (1 + 0.03 * t);
+    return Math.min(98, initial + growth);
   });
 }
 
 function calcCapital(p, ages) {
-  // 资本复利：经典复利曲线（hockey stick）
-  // 退休前（65岁）指数增长；65岁后切换为保守管理，曲线走平（不再增长也不下降）
-  // 归一化：让30年复利后的值接近90分
   const r = p.rate / 100;
-  const RETIRE_AGE = 65;
-  // 计算缩放因子：让满参数下退休时约达85分
-  const K0 = p.init * 0.12;
-  const C  = p.add  * 0.04;
-  const computeRaw = (t) => {
-    const kg = K0 * Math.pow(1 + r, t);
-    const cg = r > 0 ? C * (Math.pow(1 + r, t) - 1) / r : C * t;
-    return kg + cg;
-  };
-  // 退休年时的资产值（用作走平基准）
-  const retireT = Math.max(0, RETIRE_AGE - p.startAge);
-  const retireVal = Math.min(95, computeRaw(retireT));
+  const K0 = p.init * 0.18;
+  const C = p.add * 0.06;
   return ages.map(age => {
     if (age < p.startAge) return 0;
     const t = age - p.startAge;
-    if (age >= RETIRE_AGE) {
-      return retireVal; // 走平——保守管理，维持不减
-    }
-    return Math.min(95, computeRaw(t));
+    const kg = K0 * Math.pow(1 + r, t);
+    const cg = r > 0 ? C * (Math.pow(1 + r, t) - 1) / r : C * t;
+    return Math.min(100, (kg + cg) * 0.85);
   });
 }
 
@@ -1784,21 +1738,17 @@ function calcAllCurves() {
 }
 
 function calcComposite(data, enabled) {
-  // 复合叠加：资本曲线承担"托底"职能，权重最高
-  // 核心逻辑：composite的每个低点 > 前一个低点（永久牛市）
-  // 资本的走平特性 + 连续创业的底板递升 = 低点永远不会低于历史低点
-  const W = { employ: 0.10, pulse: 0.15, serial: 0.28, ai: 0.22, capital: 0.25 };
+  const W = { employ: 0.12, pulse: 0.18, serial: 0.27, ai: 0.23, capital: 0.20 };
   const raw = AGES.map((_, i) => {
     let sum = 0, wsum = 0;
     for (const k of Object.keys(W)) {
       if (enabled[k] && data[k]) { sum += (data[k][i] || 0) * W[k]; wsum += W[k]; }
     }
-    return wsum > 0 ? sum / wsum : 0;
+    return wsum > 0 ? (sum / wsum) * 1.15 : 0;
   });
-  // 轻度平滑（保留形态，去除噪声）
   return raw.map((v, i) => {
     if (i === 0 || i === raw.length - 1) return v;
-    return raw[i-1] * 0.2 + v * 0.6 + raw[i+1] * 0.2;
+    return raw[i-1] * 0.25 + v * 0.5 + raw[i+1] * 0.25;
   });
 }
 

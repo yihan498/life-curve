@@ -1,0 +1,1504 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>人生曲线 · Life Trajectory</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+
+  <style>
+    /* ── TOKENS ─────────────────────────────────────────── */
+    :root {
+      --bg0: #04080f;
+      --bg1: #080e1a;
+      --bg2: #0d1525;
+      --bg3: #122035;
+      --bd:  #162840;
+      --bd2: #1e3555;
+      --t0:  #dce9fd;
+      --t1:  #7a9dbf;
+      --t2:  #3d5e7c;
+
+      --cyan:   #00d9ff;
+      --orange: #ff6b35;
+      --purple: #a855f7;
+      --gold:   #f5a623;
+      --green:  #00d9a0;
+      --rose:   #ff4b6e;
+      --white:  #f0f6ff;
+
+      --c-employ:    #5b8fbf;
+      --c-pulse:     #ff6b35;
+      --c-serial:    #00d9ff;
+      --c-ai:        #a855f7;
+      --c-capital:   #f5a623;
+      --c-composite: #f0f6ff;
+
+      --r: 8px;
+      --sidebar: 270px;
+      --panel: 230px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 13px; }
+
+    body {
+      background: var(--bg0);
+      color: var(--t0);
+      font-family: 'Barlow', sans-serif;
+      line-height: 1.5;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── LAYOUT ──────────────────────────────────────────── */
+    .app {
+      display: grid;
+      grid-template-rows: 54px 1fr;
+      height: 100vh;
+    }
+
+    /* HEADER */
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 0 20px;
+      background: var(--bg1);
+      border-bottom: 1px solid var(--bd);
+      z-index: 10;
+    }
+
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .logo em { color: var(--cyan); font-style: normal; }
+
+    .header-pills {
+      display: flex;
+      gap: 8px;
+      flex: 1;
+      overflow-x: auto;
+      padding: 4px 0;
+    }
+    .header-pills::-webkit-scrollbar { display: none; }
+
+    .pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 12px;
+      border-radius: 100px;
+      border: 1px solid var(--bd2);
+      background: var(--bg3);
+      white-space: nowrap;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+    }
+    .pill .lbl { color: var(--t2); }
+    .pill .val { color: var(--t0); font-weight: 500; }
+    .pill .val.hi { color: var(--cyan); }
+    .pill .val.ok { color: var(--green); }
+    .pill .val.warn { color: var(--gold); }
+
+    .hdr-btns { display: flex; gap: 6px; margin-left: auto; flex-shrink: 0; }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 12px; border-radius: var(--r);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 12px; font-weight: 600; letter-spacing: .5px;
+      cursor: pointer; border: 1px solid var(--bd2);
+      background: var(--bg3); color: var(--t1);
+      transition: all .18s;
+    }
+    .btn:hover { border-color: var(--cyan); color: var(--cyan); }
+    .btn.primary { background: var(--cyan); color: var(--bg0); border-color: var(--cyan); }
+    .btn.primary:hover { background: #00b8d9; }
+
+    /* BODY */
+    .body {
+      display: grid;
+      grid-template-columns: var(--sidebar) 1fr var(--panel);
+      overflow: hidden;
+    }
+
+    /* ── SIDEBAR ─────────────────────────────────────────── */
+    .sidebar {
+      background: var(--bg1);
+      border-right: 1px solid var(--bd);
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+    .sidebar::-webkit-scrollbar { width: 3px; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--bd2); border-radius: 2px; }
+
+    .sec {
+      border-bottom: 1px solid var(--bd);
+    }
+
+    .sec-hdr {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 14px; cursor: pointer;
+      transition: background .15s; user-select: none;
+    }
+    .sec-hdr:hover { background: var(--bg2); }
+
+    .sec-title {
+      display: flex; align-items: center; gap: 8px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 1.2px; text-transform: uppercase;
+      color: var(--t1);
+    }
+
+    .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+    .sec-controls {
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    /* Toggle switch */
+    .tog {
+      width: 30px; height: 16px;
+      background: var(--bd2);
+      border-radius: 8px; position: relative;
+      cursor: pointer; border: none;
+      transition: background .2s; flex-shrink: 0;
+    }
+    .tog::after {
+      content: ''; position: absolute;
+      top: 2px; left: 2px;
+      width: 12px; height: 12px;
+      border-radius: 50%; background: var(--t2);
+      transition: all .2s;
+    }
+    .tog.on { background: color-mix(in srgb, currentColor 40%, transparent); }
+    .tog.on::after { transform: translateX(14px); background: white; }
+
+    .chev {
+      font-size: 9px; color: var(--t2);
+      transition: transform .2s;
+    }
+    .chev.open { transform: rotate(180deg); }
+
+    .sec-body {
+      display: none; padding: 0 14px 14px;
+    }
+    .sec-body.open { display: block; }
+
+    /* Form fields */
+    .fg { margin-bottom: 10px; }
+
+    .fl {
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 10px; color: var(--t2);
+      text-transform: uppercase; letter-spacing: .5px;
+      margin-bottom: 5px;
+    }
+    .fl .fv {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px; color: var(--t1);
+      text-transform: none; letter-spacing: 0;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none; appearance: none;
+      width: 100%; height: 2px;
+      background: var(--bd2); border-radius: 1px;
+      outline: none; cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none;
+      width: 12px; height: 12px;
+      background: currentColor; border-radius: 50%;
+      cursor: pointer; transition: transform .15s;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.4); }
+
+    .hint {
+      font-size: 10px; color: var(--t2); line-height: 1.5;
+      padding: 6px 0;
+    }
+
+    /* ── MAIN ────────────────────────────────────────────── */
+    .main {
+      display: flex; flex-direction: column;
+      overflow: hidden; background: var(--bg0);
+    }
+
+    .chart-wrap {
+      flex: 1; position: relative; padding: 16px 16px 8px;
+      min-height: 0;
+    }
+
+    .chart-inner {
+      position: relative; width: 100%; height: 100%;
+    }
+
+    /* Toggle bar at bottom of chart area */
+    .toggle-bar {
+      padding: 8px 16px 10px;
+      background: var(--bg1);
+      border-top: 1px solid var(--bd);
+      display: flex; gap: 6px; flex-wrap: wrap;
+    }
+
+    .ctog {
+      display: flex; align-items: center; gap: 6px;
+      padding: 5px 12px; border-radius: 100px;
+      border: 1px solid var(--bd2); background: transparent;
+      cursor: pointer; transition: all .18s;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 12px; font-weight: 600; letter-spacing: .5px;
+      color: var(--t2); white-space: nowrap;
+    }
+    .ctog .cdot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: currentColor; opacity: .4;
+    }
+    .ctog.on {
+      border-color: currentColor; color: inherit;
+      background: color-mix(in srgb, currentColor 8%, transparent);
+    }
+    .ctog.on .cdot { opacity: 1; }
+
+    /* ── PANEL (right) ───────────────────────────────────── */
+    .panel {
+      background: var(--bg1);
+      border-left: 1px solid var(--bd);
+      overflow-y: auto;
+      padding: 14px;
+      display: flex; flex-direction: column; gap: 14px;
+    }
+    .panel::-webkit-scrollbar { width: 3px; }
+    .panel::-webkit-scrollbar-thumb { background: var(--bd2); border-radius: 2px; }
+
+    .ptt {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--t2); margin-bottom: 6px;
+    }
+
+    /* Age widget */
+    .age-box {
+      background: var(--bg3); border: 1px solid var(--bd2);
+      border-radius: var(--r); padding: 12px;
+    }
+    .age-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 44px; font-weight: 900;
+      color: var(--cyan); line-height: 1;
+    }
+    .age-num sup {
+      font-size: 14px; font-family: 'Barlow', sans-serif;
+      font-weight: 300; color: var(--t2); margin-left: 3px;
+    }
+
+    /* Stage select */
+    select {
+      width: 100%; background: var(--bg3);
+      border: 1px solid var(--bd2); border-radius: var(--r);
+      color: var(--t0); padding: 7px 10px;
+      font-family: 'Barlow', sans-serif; font-size: 12px;
+      outline: none; cursor: pointer;
+    }
+    select:focus { border-color: var(--cyan); }
+
+    /* Projection rows */
+    .proj-row {
+      background: var(--bg3); border: 1px solid var(--bd);
+      border-radius: 6px; padding: 8px 10px;
+    }
+    .proj-top {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 5px;
+    }
+    .proj-age { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--t2); }
+    .proj-val { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 500; color: var(--t0); }
+    .proj-bar { height: 2px; background: var(--bd2); border-radius: 1px; overflow: hidden; }
+    .proj-fill { height: 100%; background: var(--cyan); transition: width .5s ease; border-radius: 1px; }
+
+    /* Milestones */
+    .ms-list { display: flex; flex-direction: column; gap: 5px; }
+    .ms-item {
+      display: flex; align-items: flex-start; gap: 8px;
+      padding: 7px 8px;
+      background: var(--bg3); border: 1px solid var(--bd);
+      border-radius: 6px; font-size: 11px;
+    }
+    .ms-age {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px; color: var(--cyan); flex-shrink: 0; min-width: 24px;
+    }
+    .ms-txt {
+      color: var(--t1); line-height: 1.4; flex: 1;
+      min-width: 0; word-break: break-all;
+    }
+    .ms-del {
+      background: none; border: none; color: var(--t2);
+      cursor: pointer; font-size: 14px; flex-shrink: 0;
+      line-height: 1; padding: 0;
+    }
+    .ms-del:hover { color: var(--rose); }
+
+    textarea {
+      width: 100%; background: var(--bg3);
+      border: 1px solid var(--bd2); border-radius: var(--r);
+      color: var(--t1); font-family: 'Barlow', sans-serif;
+      font-size: 11px; line-height: 1.6; padding: 8px;
+      resize: vertical; outline: none; min-height: 80px;
+      transition: border-color .2s;
+    }
+    textarea:focus { border-color: var(--cyan); }
+
+    /* ── RESPONSIVE ──────────────────────────────────────── */
+    @media (max-width: 900px) {
+      body { overflow: auto; }
+      .app { height: auto; }
+      .body {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto;
+      }
+      .sidebar { border-right: none; border-bottom: 1px solid var(--bd); }
+      .panel { border-left: none; border-top: 1px solid var(--bd); }
+      .chart-wrap { min-height: 50vh; }
+    }
+
+    /* ── ANIMATIONS ──────────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .header { animation: fadeUp .3s ease; }
+    .sidebar { animation: fadeUp .35s ease; }
+    .main    { animation: fadeUp .4s ease; }
+    .panel   { animation: fadeUp .45s ease; }
+
+    /* Permanent bull indicator */
+    .bull-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 2px 8px; border-radius: 4px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 11px; font-weight: 700;
+    }
+    .bull-badge.yes { background: rgba(0,217,160,.15); color: var(--green); }
+    .bull-badge.no  { background: rgba(255,75,110,.15); color: var(--rose); }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ── HEADER ──────────────────────────────────────────── -->
+  <header class="header">
+    <div class="logo">人生<em>曲线</em></div>
+
+    <div class="header-pills">
+      <div class="pill">
+        <span class="lbl">年龄</span>
+        <span class="val hi" id="hdr-age">—</span>
+      </div>
+      <div class="pill">
+        <span class="lbl">阶段</span>
+        <span class="val" id="hdr-stage">—</span>
+      </div>
+      <div class="pill">
+        <span class="lbl">低点保障</span>
+        <span class="val" id="hdr-floor">—</span>
+      </div>
+      <div class="pill">
+        <span class="lbl">复合指数</span>
+        <span class="val hi" id="hdr-composite">—</span>
+      </div>
+      <div class="pill">
+        <span class="lbl">资本曲线</span>
+        <span class="val" id="hdr-capital">—</span>
+      </div>
+    </div>
+
+    <div class="hdr-btns">
+      <button class="btn" onclick="importData()">导入</button>
+      <button class="btn" onclick="exportData()">导出</button>
+      <button class="btn" onclick="saveSnapshot()">保存快照</button>
+      <button class="btn" onclick="showSnapshots()">历史快照</button>
+      <button class="btn" onclick="resetAll()">重置</button>
+    </div>
+  </header>
+
+  <!-- ── BODY ────────────────────────────────────────────── -->
+  <div class="body">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+      <!-- Global -->
+      <div class="sec">
+        <div class="sec-hdr" onclick="toggleSec('global')">
+          <div class="sec-title">⚙ 全局设置</div>
+          <span class="chev open" id="chev-global">▼</span>
+        </div>
+        <div class="sec-body open" id="sb-global">
+          <div class="fg">
+            <div class="fl"><span>目标寿命</span><span class="fv" id="fv-maxAge">80</span></div>
+            <input type="range" min="60" max="100" value="80" id="sl-maxAge" style="color:var(--cyan)">
+          </div>
+        </div>
+      </div>
+
+      <!-- Employment -->
+      <div class="sec">
+        <div class="sec-hdr" onclick="toggleSec('employ')">
+          <div class="sec-title">
+            <span class="dot" style="background:var(--c-employ)"></span>传统就业
+          </div>
+          <div class="sec-controls">
+            <button class="tog on" style="color:var(--c-employ)" id="tog-employ" onclick="event.stopPropagation();toggleCurve('employ')"></button>
+            <span class="chev" id="chev-employ">▼</span>
+          </div>
+        </div>
+        <div class="sec-body" id="sb-employ">
+          <div class="fg">
+            <div class="fl"><span>开始工作年龄</span><span class="fv" id="fv-e-start">22</span></div>
+            <input type="range" min="18" max="30" value="22" id="sl-e-start" style="color:var(--c-employ)">
+          </div>
+          <div class="fg">
+            <div class="fl"><span>职业巅峰年龄</span><span class="fv" id="fv-e-peak">38</span></div>
+            <input type="range" min="28" max="55" value="38" id="sl-e-peak" style="color:var(--c-employ)">
+          </div>
+          <div class="fg">
+            <div class="fl"><span>退休年龄</span><span class="fv" id="fv-e-retire">60</span></div>
+            <input type="range" min="45" max="75" value="60" id="sl-e-retire" style="color:var(--c-employ)">
+          </div>
+          <div class="fg">
+            <div class="fl"><span>峰值收入指数</span><span class="fv" id="fv-e-val">70</span></div>
+            <input type="range" min="20" max="180" value="70" id="sl-e-val" style="color:var(--c-employ)">
+          </div>
+        </div>
+      </div>
+
+      <!-- Pulse -->
+      <div class="sec">
+        <div class="sec-hdr" onclick="toggleSec('pulse')">
+          <div class="sec-title">
+            <span class="dot" style="background:var(--c-pulse)"></span>创业脉冲
+          </div>
+          <div class="sec-controls">
+            <button class="tog on" style="color:var(--c-pulse)" id="tog-pulse" onclick="event.stopPropagation();toggleCurve('pulse')"></button>
+            <span class="chev" id="chev-pulse">▼</span>
+          </div>
+        </div>
+        <div class="sec-body" id="sb-pulse">
+          <div class="fg">
+            <div class="fl"><span>开始尝试年龄</span><span class="fv" id="fv-p-start">20</span></div>
+            <input type="range" min="16" max="35" value="20" id="sl-p-start" style="color:var(--c-pulse)">
+          </div>
+          <div class="fg">
+            <div class="fl"><span>尝试总次数</span><span class="fv" id="fv-p-cnt">15</span></div>
+            <input type="range" min="5" max="35" value="15" id="sl-p-cnt" style="color:var(--c-pulse)">
+          </div>
+          <div class="fg">
+            <div class="fl"><span>成功率 %</span><span class="fv" id="fv-p-rate">30</span></div>
+            <input type="range" min="5" max="80" value="30" id="sl-p-rate" style="color:var(--c-pulse)">
+          </div>
+          <div class="fg">
+            <div class="fl"><span>峰值幅度</span><span class="fv" id="fv-p-amp">110</span></div>
+            <input type="range" min="30" max="220" value="110" id="sl-p-amp" style="color:var(--c-pulse)">
+          </div>
+        </div>
+      </div>
+
+      <!-- Serial -->
+      <div class="sec">
+        <div class="sec-hdr" onclick="toggleSec('serial')">
+          <div class="sec-title">
+            <span class="dot" style="background:var(--c-serial)"></span>连续创业
+          </div>
+          <div class="sec-controls">
+            <button class="tog on" style="color:var(--c-serial)" id="tog-serial" onclick="event.stopPropagation();toggleCurve('serial')"></button>
+            <span class="chev" id="chev-serial">▼</span>
+          </div>
+        </div>
+        <div class="sec-body" id="sb-serial">
+          <div class="fg">
+            <div class="fl"><span>启动年龄</span><span class="fv" id="fv-s-start">20</span></div>
+            <input type="range" min="16" max="35" value="20" id="sl-s-start" style="color:var(--c-serial)">
+          </div>
+          <div class="fg">
+            <div class="fl"><span>周期数量</span><span class="fv" id="fv-s-cyc">4</span></div>
+            <input type="range" min="2" max="8" value="4" id="sl-s-cyc" style="color:var(--c-serial)">
+          </div>
+          <div class="fg">
+            <div class="fl"><span>周期长度 (年)</span><span class="fv" id="fv-s-len">7</span></div>
+            <input type="range" min="3" max="15" value="7" id="sl-s-len" style="color:var(--c-serial)">
+          </div>
+          <div class="fg">
+            <div class="fl"><span>最终峰值指数</span><span class="fv" id="fv-s-peak">160</span></div>
+            <input type="range" min="60" max="350" value="160" id="sl-s-peak" style="color:var(--c-serial)">
+          </div>
+          <div class="fg">
+            <div class="fl"><span>阶梯幅度 %</span><span class="fv" id="fv-s-step">35</span></div>
+            <input type="range" min="10" max="60" value="35" id="sl-s-step" style="color:var(--c-serial)">
+          </div>
+        </div>
+      </div>
+
+      <!-- AI -->
+      <div class="sec">
+        <div class="sec-hdr" onclick="toggleSec('ai')">
+          <div class="sec-title">
+            <span class="dot" style="background:var(--c-ai)"></span>AI 协作
+          </div>
+          <div class="sec-controls">
+            <button class="tog on" style="color:var(--c-ai)" id="tog-ai" onclick="event.stopPropagation();toggleCurve('ai')"></button>
+            <span class="chev" id="chev-ai">▼</span>
+          </div>
+        </div>
+        <div class="sec-body" id="sb-ai">
+          <div class="fg">
+            <div class="fl"><span>采用 AI 年龄</span><span class="fv" id="fv-a-start">24</span></div>
+            <input type="range" min="15" max="50" value="24" id="sl-a-start" style="color:var(--c-ai)">
+          </div>
+          <div class="fg">
+            <div class="fl"><span>初始跃迁量</span><span class="fv" id="fv-a-jump">70</span></div>
+            <input type="range" min="10" max="180" value="70" id="sl-a-jump" style="color:var(--c-ai)">
+          </div>
+          <div class="fg">
+            <div class="fl"><span>协作深度 (年增长)</span><span class="fv" id="fv-a-grow">4</span></div>
+            <input type="range" min="1" max="20" value="4" id="sl-a-grow" style="color:var(--c-ai)">
+          </div>
+          <div class="fg">
+            <div class="fl"><span>当前技能水平 %</span><span class="fv" id="fv-a-skill">60</span></div>
+            <input type="range" min="10" max="100" value="60" id="sl-a-skill" style="color:var(--c-ai)">
+          </div>
+        </div>
+      </div>
+
+      <!-- Capital -->
+      <div class="sec">
+        <div class="sec-hdr" onclick="toggleSec('capital')">
+          <div class="sec-title">
+            <span class="dot" style="background:var(--c-capital)"></span>资本复利
+          </div>
+          <div class="sec-controls">
+            <button class="tog on" style="color:var(--c-capital)" id="tog-capital" onclick="event.stopPropagation();toggleCurve('capital')"></button>
+            <span class="chev" id="chev-capital">▼</span>
+          </div>
+        </div>
+        <div class="sec-body" id="sb-capital">
+          <div class="fg">
+            <div class="fl"><span>开始投资年龄</span><span class="fv" id="fv-k-start">28</span></div>
+            <input type="range" min="18" max="55" value="28" id="sl-k-start" style="color:var(--c-capital)">
+          </div>
+          <div class="fg">
+            <div class="fl"><span>初始资本指数</span><span class="fv" id="fv-k-init">15</span></div>
+            <input type="range" min="1" max="120" value="15" id="sl-k-init" style="color:var(--c-capital)">
+          </div>
+          <div class="fg">
+            <div class="fl"><span>年化收益率 %</span><span class="fv" id="fv-k-rate">8</span></div>
+            <input type="range" min="3" max="30" value="8" id="sl-k-rate" style="color:var(--c-capital)">
+          </div>
+          <div class="fg">
+            <div class="fl"><span>年度追加投入</span><span class="fv" id="fv-k-add">8</span></div>
+            <input type="range" min="0" max="80" value="8" id="sl-k-add" style="color:var(--c-capital)">
+          </div>
+        </div>
+      </div>
+
+      <!-- Composite -->
+      <div class="sec">
+        <div class="sec-hdr" onclick="toggleSec('composite')">
+          <div class="sec-title">
+            <span class="dot" style="background:var(--c-composite)"></span>复合叠加
+          </div>
+          <div class="sec-controls">
+            <button class="tog on" style="color:var(--c-composite)" id="tog-composite" onclick="event.stopPropagation();toggleCurve('composite')"></button>
+            <span class="chev" id="chev-composite">▼</span>
+          </div>
+        </div>
+        <div class="sec-body" id="sb-composite">
+          <p class="hint">
+            复合叠加是所有激活曲线的加权合成，代表理想人生轨迹的整体走向。<br><br>
+            <strong style="color:var(--t1)">永久牛市目标</strong>：每个低点都高于前一个低点。<br><br>
+            通过调整其他曲线参数，观察复合曲线形态的变化。
+          </p>
+          <div class="fg">
+            <div class="fl"><span>平滑系数</span><span class="fv" id="fv-comp-smooth">3.0</span></div>
+            <input type="range" min="10" max="60" value="30" id="sl-comp-smooth" step="1" style="color:var(--c-composite)">
+          </div>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- MAIN CHART -->
+    <main class="main">
+      <div class="chart-wrap">
+        <div class="chart-inner">
+          <canvas id="chart"></canvas>
+        </div>
+      </div>
+
+      <div class="toggle-bar">
+        <button class="ctog on" style="color:var(--c-employ)"    data-key="employ"    onclick="toggleCurve('employ')">   <span class="cdot"></span>传统就业</button>
+        <button class="ctog on" style="color:var(--c-pulse)"     data-key="pulse"     onclick="toggleCurve('pulse')">    <span class="cdot"></span>创业脉冲</button>
+        <button class="ctog on" style="color:var(--c-serial)"    data-key="serial"    onclick="toggleCurve('serial')">   <span class="cdot"></span>连续创业</button>
+        <button class="ctog on" style="color:var(--c-ai)"        data-key="ai"        onclick="toggleCurve('ai')">       <span class="cdot"></span>AI 协作</button>
+        <button class="ctog on" style="color:var(--c-capital)"   data-key="capital"   onclick="toggleCurve('capital')">  <span class="cdot"></span>资本复利</button>
+        <button class="ctog on" style="color:var(--c-composite)" data-key="composite" onclick="toggleCurve('composite')"><span class="cdot"></span>复合叠加</button>
+      </div>
+    </main>
+
+    <!-- RIGHT PANEL -->
+    <aside class="panel">
+
+      <!-- Age -->
+      <div>
+        <div class="ptt">当前年龄</div>
+        <div class="age-box">
+          <div class="age-num" id="age-num">26<sup>岁</sup></div>
+          <input type="range" min="15" max="80" value="26" id="age-sl" style="color:var(--cyan);margin-top:8px">
+        </div>
+      </div>
+
+      <!-- Stage -->
+      <div>
+        <div class="ptt">当前阶段</div>
+        <select id="stage-sel">
+          <option value="edu">📚 学习积累期</option>
+          <option value="explore" selected>🔍 探索尝试期</option>
+          <option value="growth">📈 快速成长期</option>
+          <option value="peak">🚀 巅峰突破期</option>
+          <option value="compound">💰 复利收获期</option>
+          <option value="stable">🏔 稳定传承期</option>
+        </select>
+      </div>
+
+      <!-- Projections -->
+      <div>
+        <div class="ptt">关键节点预测</div>
+        <div id="proj-list" style="display:flex;flex-direction:column;gap:5px"></div>
+      </div>
+
+      <!-- Milestones -->
+      <div>
+        <div class="ptt">人生里程碑</div>
+        <div class="ms-list" id="ms-list"></div>
+        <button class="btn" style="width:100%;margin-top:6px;justify-content:center" onclick="addMilestone()">+ 添加里程碑</button>
+      </div>
+
+      <!-- Notes -->
+      <div style="flex:1">
+        <div class="ptt">当前阶段备注</div>
+        <textarea id="notes" placeholder="记录你正在进行的事业、当前的目标、或任何想对未来自己说的话..."></textarea>
+      </div>
+
+    </aside>
+
+  </div>
+</div>
+
+<!-- SNAPSHOT MODAL -->
+<div id="snap-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center">
+  <div style="background:var(--bg2);border:1px solid var(--bd2);border-radius:12px;padding:24px;max-width:500px;width:90%;max-height:80vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <strong style="font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:1px;text-transform:uppercase">历史快照</strong>
+      <button class="btn" onclick="document.getElementById('snap-modal').style.display='none'">关闭</button>
+    </div>
+    <div id="snap-list" style="display:flex;flex-direction:column;gap:8px"></div>
+    <p id="snap-empty" style="color:var(--t2);font-size:12px;text-align:center;padding:20px 0">暂无快照</p>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════
+// CONSTANTS
+// ════════════════════════════════════════════════
+const MIN_AGE = 15;
+const AGES = Array.from({length: 71}, (_, i) => MIN_AGE + i); // 15–85
+
+const COLORS = {
+  employ:    '#5b8fbf',
+  pulse:     '#ff6b35',
+  serial:    '#00d9ff',
+  ai:        '#a855f7',
+  capital:   '#f5a623',
+  composite: '#f0f6ff'
+};
+
+const STAGES = {
+  edu:      '学习积累期',
+  explore:  '探索尝试期',
+  growth:   '快速成长期',
+  peak:     '巅峰突破期',
+  compound: '复利收获期',
+  stable:   '稳定传承期'
+};
+
+// ════════════════════════════════════════════════
+// DEFAULT STATE
+// ════════════════════════════════════════════════
+const DEFAULTS = {
+  currentAge: 26,
+  maxAge: 80,
+  stage: 'explore',
+  notes: '',
+  milestones: [
+    { age: 22, text: '大学毕业，开始工作' },
+    { age: 25, text: '第一次创业尝试' },
+    { age: 30, text: '目标：建立稳定被动收入' },
+    { age: 35, text: '第二个创业周期突破' }
+  ],
+  enabled: {
+    employ: true, pulse: true, serial: true,
+    ai: true, capital: true, composite: true
+  },
+  params: {
+    maxAge:      80,
+    employ:      { start: 22, peak: 38, retire: 60, val: 70 },
+    pulse:       { start: 20, cnt: 15, rate: 30, amp: 110 },
+    serial:      { start: 20, cyc: 4, len: 7, peak: 160, step: 35 },
+    ai:          { start: 24, jump: 70, grow: 4, skill: 60 },
+    capital:     { start: 28, init: 15, rate: 8, add: 8 },
+    compSmooth:  3.0
+  }
+};
+
+let S = deepClone(DEFAULTS);
+
+// ════════════════════════════════════════════════
+// MATH ENGINE
+// ════════════════════════════════════════════════
+function ss(t) { return t * t * (3 - 2 * t); } // smoothstep
+
+function calcEmploy(p, ages) {
+  return ages.map(age => {
+    if (age < p.start) return 0;
+    if (age <= p.peak) {
+      const t = (age - p.start) / (p.peak - p.start);
+      return p.val * ss(t) * 0.88;
+    }
+    if (age <= p.retire) {
+      const t = (age - p.peak) / (p.retire - p.peak);
+      return p.val * 0.88 * (1 - 0.35 * Math.pow(t, 1.5));
+    }
+    return p.val * 0.11 * Math.exp(-0.22 * (age - p.retire));
+  });
+}
+
+function calcPulse(p, ages) {
+  // Deterministic pulses based on params (seed = start age)
+  const pulses = [];
+  const span = 75 - p.start;
+  const avgGap = span / p.cnt;
+  let t = p.start;
+  for (let i = 0; i < p.cnt; i++) {
+    const variation = 0.3 + 0.7 * Math.abs(Math.sin(i * 1.618 + p.start * 0.1));
+    t += avgGap * variation * 0.7;
+    if (t > 82) break;
+    const ok = Math.abs(Math.sin(i * 2.39 + 1.1)) < (p.rate / 100);
+    const amp = ok
+      ? p.amp * (0.5 + 0.5 * Math.abs(Math.sin(i * 0.73)))
+      : p.amp * 0.18 * (0.4 + 0.6 * Math.abs(Math.sin(i * 1.27)));
+    const w = ok ? 0.85 + Math.abs(Math.sin(i)) * 0.5 : 0.28 + Math.abs(Math.sin(i * 1.1)) * 0.15;
+    pulses.push({ c: t, a: amp, w });
+  }
+  return ages.map(age => {
+    let v = 0;
+    for (const p of pulses) {
+      const d = Math.abs(age - p.c) / p.w;
+      if (d < 3) v = Math.max(v, p.a * Math.exp(-1.5 * d * d));
+    }
+    return v;
+  });
+}
+
+function calcSerial(p, ages) {
+  const span = p.cyc * p.len;
+  const endAge = p.start + span;
+  const stepFrac = p.step / 100;
+  return ages.map(age => {
+    if (age < p.start) return 0;
+    if (age >= endAge) {
+      const extra = (age - endAge) / 15;
+      return p.peak * (0.82 + 0.08 * Math.min(extra, 1));
+    }
+    const rel = age - p.start;
+    const ci = Math.floor(rel / p.len);
+    const cp = (rel % p.len) / p.len;
+    const baseline = (ci / p.cyc) * p.peak * stepFrac;
+    const cyclePeak = p.peak * ((ci + 1) / p.cyc);
+    let v;
+    if (cp < 0.14) {
+      v = baseline + cyclePeak * 0.18 * (cp / 0.14);
+    } else if (cp < 0.44) {
+      const t = (cp - 0.14) / 0.3;
+      v = baseline + cyclePeak * (0.18 + 0.82 * ss(t));
+    } else if (cp < 0.73) {
+      const wob = Math.sin(cp * 18) * cyclePeak * 0.03;
+      v = baseline + cyclePeak * 0.97 + wob;
+    } else {
+      const t = (cp - 0.73) / 0.27;
+      const nb = ((ci + 1) / p.cyc) * p.peak * stepFrac;
+      v = baseline + cyclePeak * (0.97 - 0.72 * t) + nb * t * 0.4;
+    }
+    return Math.max(0, v);
+  });
+}
+
+function calcAI(p, ages) {
+  const skillMult = p.skill / 100;
+  return ages.map(age => {
+    if (age < p.start) return 0;
+    const t = age - p.start;
+    const sig = 1 / (1 + Math.exp(-4 * (t - 0.4)));
+    const initial = p.jump * skillMult * sig;
+    const growth = p.grow * skillMult * t * (1 + 0.04 * t);
+    return initial + growth;
+  });
+}
+
+function calcCapital(p, ages) {
+  const r = p.rate / 100;
+  return ages.map(age => {
+    if (age < p.start) return 0;
+    const t = age - p.start;
+    const cg = p.init * Math.pow(1 + r, t);
+    const ag = r > 0 ? p.add * (Math.pow(1 + r, t) - 1) / r : p.add * t;
+    return cg + ag;
+  });
+}
+
+function calcComposite(data, enabled, smooth) {
+  const keys = ['employ', 'pulse', 'serial', 'ai', 'capital'];
+  const weights = { employ: 0.12, pulse: 0.18, serial: 0.28, ai: 0.22, capital: 0.20 };
+  const raw = AGES.map((_, i) => {
+    let sum = 0, wsum = 0;
+    for (const k of keys) {
+      if (enabled[k] && data[k]) {
+        sum += (data[k][i] || 0) * weights[k];
+        wsum += weights[k];
+      }
+    }
+    return wsum > 0 ? sum / wsum * smooth : 0;
+  });
+  // Gaussian blur for smoothness
+  const blurred = raw.map((v, i) => {
+    const w = [0.07, 0.15, 0.23, 0.15, 0.07];
+    let s = 0, ws = 0;
+    for (let d = -2; d <= 2; d++) {
+      const idx = i + d;
+      if (idx >= 0 && idx < raw.length) {
+        s += raw[idx] * w[d + 2]; ws += w[d + 2];
+      }
+    }
+    return ws > 0 ? s / ws : v;
+  });
+  return blurred;
+}
+
+// ════════════════════════════════════════════════
+// CHART
+// ════════════════════════════════════════════════
+let chart, cdata = {};
+
+function buildAllData() {
+  const p = S.params;
+  cdata.employ   = calcEmploy(p.employ, AGES);
+  cdata.pulse    = calcPulse(p.pulse, AGES);
+  cdata.serial   = calcSerial(p.serial, AGES);
+  cdata.ai       = calcAI(p.ai, AGES);
+  cdata.capital  = calcCapital(p.capital, AGES);
+  cdata.composite = calcComposite(cdata, S.enabled, p.compSmooth);
+}
+
+function buildDatasets() {
+  const defs = [
+    { key: 'employ',    label: '传统就业', tension: 0.4  },
+    { key: 'pulse',     label: '创业脉冲', tension: 0.3  },
+    { key: 'serial',    label: '连续创业', tension: 0.42 },
+    { key: 'ai',        label: 'AI 协作',  tension: 0.5  },
+    { key: 'capital',   label: '资本复利', tension: 0.55 },
+    { key: 'composite', label: '复合叠加', tension: 0.45 },
+  ];
+  return defs.map(d => ({
+    label: d.label,
+    data: cdata[d.key],
+    borderColor: COLORS[d.key],
+    backgroundColor: d.key === 'composite'
+      ? `${COLORS[d.key]}10`
+      : `${COLORS[d.key]}08`,
+    borderWidth: d.key === 'composite' ? 2.5 : 1.6,
+    tension: d.tension,
+    fill: d.key === 'composite',
+    pointRadius: 0,
+    pointHoverRadius: 5,
+    pointHoverBackgroundColor: COLORS[d.key],
+    hidden: !S.enabled[d.key],
+    order: d.key === 'composite' ? 0 : 1,
+  }));
+}
+
+function initChart() {
+  const ctx = document.getElementById('chart').getContext('2d');
+  Chart.register(ChartjsPluginAnnotation);
+
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: { labels: AGES, datasets: buildDatasets() },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 350, easing: 'easeInOutQuart' },
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(4,8,15,0.96)',
+          borderColor: '#1e3555',
+          borderWidth: 1,
+          padding: 12,
+          titleFont: { family: 'Barlow Condensed', size: 14, weight: '700' },
+          bodyFont: { family: 'JetBrains Mono', size: 11 },
+          titleColor: '#dce9fd',
+          bodyColor: '#7a9dbf',
+          callbacks: {
+            title: items => `${items[0].label} 岁`,
+            label: item => item.dataset.hidden
+              ? null
+              : ` ${item.dataset.label}  ${Math.round(item.raw)}`
+          }
+        },
+        annotation: {
+          annotations: {
+            nowLine: {
+              type: 'line',
+              xMin: S.currentAge,
+              xMax: S.currentAge,
+              borderColor: 'rgba(255,107,53,0.7)',
+              borderWidth: 1.5,
+              borderDash: [5, 4],
+              label: {
+                content: `NOW`,
+                display: true,
+                position: 'start',
+                backgroundColor: 'rgba(255,107,53,0.18)',
+                color: '#ff6b35',
+                font: { family: 'JetBrains Mono', size: 10, weight: '500' },
+                padding: { x: 7, y: 3 }
+              }
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: '#0a1420', lineWidth: 1 },
+          ticks: {
+            color: '#2d4870',
+            font: { family: 'JetBrains Mono', size: 10 },
+            maxTicksLimit: 15,
+            callback: v => `${v}`
+          },
+          border: { color: '#162840' }
+        },
+        y: {
+          grid: { color: '#0a1420', lineWidth: 1 },
+          ticks: {
+            color: '#2d4870',
+            font: { family: 'JetBrains Mono', size: 10 }
+          },
+          border: { color: '#162840' }
+        }
+      }
+    }
+  });
+}
+
+function refreshChart() {
+  if (!chart) return;
+  buildAllData();
+  chart.data.datasets = buildDatasets();
+  const ann = chart.options.plugins.annotation.annotations.nowLine;
+  ann.xMin = ann.xMax = S.currentAge;
+  chart.update();
+  refreshMetrics();
+}
+
+// ════════════════════════════════════════════════
+// METRICS
+// ════════════════════════════════════════════════
+function refreshMetrics() {
+  const comp = cdata.composite || [];
+  const maxV = Math.max(...comp.filter(v => isFinite(v)), 1);
+  const ci = S.currentAge - MIN_AGE;
+  const curV = comp[ci] || 0;
+
+  // Header pills
+  document.getElementById('hdr-age').textContent = `${S.currentAge} 岁`;
+  document.getElementById('hdr-stage').textContent = STAGES[S.stage] || '—';
+  document.getElementById('hdr-composite').textContent = Math.round(curV);
+  const capIdx = S.params.capital.start - MIN_AGE;
+  const capNow = (cdata.capital || [])[ci] || 0;
+  document.getElementById('hdr-capital').textContent = Math.round(capNow);
+
+  // Bull check
+  const bull = checkBull(comp, ci);
+  const floorEl = document.getElementById('hdr-floor');
+  floorEl.textContent = bull ? '✓ 永久牛市' : '△ 未达标';
+  floorEl.className = `val ${bull ? 'ok' : 'warn'}`;
+
+  // Projections
+  const projAges = [30, 40, 50, 60, 70].filter(a => a > S.currentAge);
+  if (projAges.length < 2) projAges.unshift(S.currentAge + 5);
+  const plist = document.getElementById('proj-list');
+  plist.innerHTML = projAges.slice(0, 5).map(a => {
+    const idx = a - MIN_AGE;
+    const v = comp[idx] || 0;
+    const pct = (v / maxV * 100).toFixed(0);
+    return `<div class="proj-row">
+      <div class="proj-top">
+        <span class="proj-age">${a} 岁</span>
+        <span class="proj-val">${Math.round(v)}</span>
+      </div>
+      <div class="proj-bar"><div class="proj-fill" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function checkBull(data, upToIdx) {
+  // Check if local minima after current age are rising
+  let prevLow = -Infinity;
+  let foundLow = false;
+  for (let i = Math.max(1, upToIdx); i < data.length - 1; i++) {
+    const v = data[i];
+    if (v < data[i-1] && v < data[i+1]) {
+      if (foundLow && v < prevLow * 0.98) return false;
+      prevLow = v;
+      foundLow = true;
+    }
+  }
+  return true;
+}
+
+// ════════════════════════════════════════════════
+// MILESTONES
+// ════════════════════════════════════════════════
+function renderMs() {
+  const list = document.getElementById('ms-list');
+  list.innerHTML = [...S.milestones]
+    .sort((a, b) => a.age - b.age)
+    .map((m, i) => `
+      <div class="ms-item">
+        <span class="ms-age">${m.age}</span>
+        <span class="ms-txt" contenteditable="true"
+          onblur="updateMs(${i}, this.textContent.trim())">${m.text}</span>
+        <button class="ms-del" onclick="removeMs(${i})">×</button>
+      </div>
+    `).join('');
+}
+
+function addMilestone() {
+  const age = parseInt(prompt('里程碑年龄（岁）', S.currentAge + 5));
+  if (!age || isNaN(age) || age < 1 || age > 120) return;
+  const text = prompt('里程碑描述', '');
+  if (!text) return;
+  S.milestones.push({ age, text });
+  renderMs(); save();
+}
+
+function removeMs(i) {
+  S.milestones.splice(i, 1);
+  renderMs(); save();
+}
+
+function updateMs(i, text) {
+  if (S.milestones[i]) { S.milestones[i].text = text; save(); }
+}
+
+// ════════════════════════════════════════════════
+// CONTROLS
+// ════════════════════════════════════════════════
+function toggleSec(id) {
+  document.getElementById(`sb-${id}`).classList.toggle('open');
+  document.getElementById(`chev-${id}`).classList.toggle('open');
+}
+
+function toggleCurve(key) {
+  S.enabled[key] = !S.enabled[key];
+  // Sidebar toggle
+  const st = document.getElementById(`tog-${key}`);
+  if (st) st.classList.toggle('on', S.enabled[key]);
+  // Bottom bar
+  const bt = document.querySelector(`[data-key="${key}"]`);
+  if (bt) bt.classList.toggle('on', S.enabled[key]);
+  refreshChart(); save();
+}
+
+// Slider binder
+function bind(slId, fvId, path, transform) {
+  const sl = document.getElementById(slId);
+  const fv = document.getElementById(fvId);
+  if (!sl) return;
+  sl.addEventListener('input', () => {
+    const raw = parseFloat(sl.value);
+    const val = transform ? transform(raw) : raw;
+    if (fv) fv.textContent = val;
+    setPath(S.params, path, val);
+    debounceUpdate();
+  });
+  // init display
+  if (fv) {
+    const raw = parseFloat(sl.value);
+    fv.textContent = transform ? transform(raw) : raw;
+  }
+}
+
+function setPath(obj, path, val) {
+  const parts = path.split('.');
+  let cur = obj;
+  for (let i = 0; i < parts.length - 1; i++) cur = cur[parts[i]];
+  cur[parts[parts.length - 1]] = val;
+}
+
+function getPath(obj, path) {
+  return path.split('.').reduce((c, k) => c?.[k], obj);
+}
+
+let debTimer;
+function debounceUpdate() {
+  clearTimeout(debTimer);
+  debTimer = setTimeout(() => { refreshChart(); save(); }, 100);
+}
+
+function wireControls() {
+  bind('sl-maxAge',      'fv-maxAge',      'maxAge');
+
+  bind('sl-e-start',     'fv-e-start',     'employ.start');
+  bind('sl-e-peak',      'fv-e-peak',      'employ.peak');
+  bind('sl-e-retire',    'fv-e-retire',    'employ.retire');
+  bind('sl-e-val',       'fv-e-val',       'employ.val');
+
+  bind('sl-p-start',     'fv-p-start',     'pulse.start');
+  bind('sl-p-cnt',       'fv-p-cnt',       'pulse.cnt');
+  bind('sl-p-rate',      'fv-p-rate',      'pulse.rate');
+  bind('sl-p-amp',       'fv-p-amp',       'pulse.amp');
+
+  bind('sl-s-start',     'fv-s-start',     'serial.start');
+  bind('sl-s-cyc',       'fv-s-cyc',       'serial.cyc');
+  bind('sl-s-len',       'fv-s-len',       'serial.len');
+  bind('sl-s-peak',      'fv-s-peak',      'serial.peak');
+  bind('sl-s-step',      'fv-s-step',      'serial.step');
+
+  bind('sl-a-start',     'fv-a-start',     'ai.start');
+  bind('sl-a-jump',      'fv-a-jump',      'ai.jump');
+  bind('sl-a-grow',      'fv-a-grow',      'ai.grow');
+  bind('sl-a-skill',     'fv-a-skill',     'ai.skill');
+
+  bind('sl-k-start',     'fv-k-start',     'capital.start');
+  bind('sl-k-init',      'fv-k-init',      'capital.init');
+  bind('sl-k-rate',      'fv-k-rate',      'capital.rate');
+  bind('sl-k-add',       'fv-k-add',       'capital.add');
+
+  bind('sl-comp-smooth', 'fv-comp-smooth', 'compSmooth', v => (v / 10).toFixed(1));
+
+  // Age slider
+  const ageSl = document.getElementById('age-sl');
+  const ageNum = document.getElementById('age-num');
+  ageSl.addEventListener('input', () => {
+    S.currentAge = parseInt(ageSl.value);
+    ageNum.innerHTML = `${S.currentAge}<sup>岁</sup>`;
+    refreshChart(); save();
+  });
+
+  // Stage
+  document.getElementById('stage-sel').addEventListener('change', e => {
+    S.stage = e.target.value;
+    refreshMetrics(); save();
+  });
+
+  // Notes
+  document.getElementById('notes').addEventListener('input', e => {
+    S.notes = e.target.value; save();
+  });
+}
+
+// ════════════════════════════════════════════════
+// APPLY STATE TO UI
+// ════════════════════════════════════════════════
+function applyState() {
+  // Age
+  document.getElementById('age-sl').value = S.currentAge;
+  document.getElementById('age-num').innerHTML = `${S.currentAge}<sup>岁</sup>`;
+
+  // Stage
+  document.getElementById('stage-sel').value = S.stage;
+
+  // Notes
+  document.getElementById('notes').value = S.notes || '';
+
+  // Sliders
+  const sliderMap = {
+    'sl-maxAge':      'maxAge',
+    'sl-e-start':     'employ.start',
+    'sl-e-peak':      'employ.peak',
+    'sl-e-retire':    'employ.retire',
+    'sl-e-val':       'employ.val',
+    'sl-p-start':     'pulse.start',
+    'sl-p-cnt':       'pulse.cnt',
+    'sl-p-rate':      'pulse.rate',
+    'sl-p-amp':       'pulse.amp',
+    'sl-s-start':     'serial.start',
+    'sl-s-cyc':       'serial.cyc',
+    'sl-s-len':       'serial.len',
+    'sl-s-peak':      'serial.peak',
+    'sl-s-step':      'serial.step',
+    'sl-a-start':     'ai.start',
+    'sl-a-jump':      'ai.jump',
+    'sl-a-grow':      'ai.grow',
+    'sl-a-skill':     'ai.skill',
+    'sl-k-start':     'capital.start',
+    'sl-k-init':      'capital.init',
+    'sl-k-rate':      'capital.rate',
+    'sl-k-add':       'capital.add',
+  };
+  for (const [id, path] of Object.entries(sliderMap)) {
+    const el = document.getElementById(id);
+    if (el) {
+      const val = getPath(S.params, path);
+      if (val !== undefined) el.value = val;
+    }
+  }
+  // compSmooth: stored as float but slider is *10
+  const csSl = document.getElementById('sl-comp-smooth');
+  if (csSl) csSl.value = Math.round((S.params.compSmooth || 3.0) * 10);
+
+  // Fv labels - re-trigger displays via slider read
+  Object.entries(sliderMap).forEach(([id, path]) => {
+    const sl = document.getElementById(id);
+    const fvId = 'fv-' + id.replace('sl-', '');
+    const fv = document.getElementById(fvId);
+    if (sl && fv) fv.textContent = sl.value;
+  });
+  const fvSmooth = document.getElementById('fv-comp-smooth');
+  if (fvSmooth) fvSmooth.textContent = (S.params.compSmooth || 3.0).toFixed(1);
+
+  // Toggles
+  for (const [key, on] of Object.entries(S.enabled)) {
+    const st = document.getElementById(`tog-${key}`);
+    if (st) st.classList.toggle('on', on);
+    const bt = document.querySelector(`[data-key="${key}"]`);
+    if (bt) bt.classList.toggle('on', on);
+  }
+
+  renderMs();
+}
+
+// ════════════════════════════════════════════════
+// PERSISTENCE
+// ════════════════════════════════════════════════
+function save() {
+  localStorage.setItem('lc_state', JSON.stringify(S));
+}
+
+function load() {
+  try {
+    const raw = localStorage.getItem('lc_state');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      S = deepMerge(deepClone(DEFAULTS), parsed);
+    }
+  } catch (e) { /* ignore */ }
+}
+
+// ════════════════════════════════════════════════
+// SNAPSHOTS
+// ════════════════════════════════════════════════
+function saveSnapshot() {
+  const snaps = JSON.parse(localStorage.getItem('lc_snaps') || '[]');
+  snaps.unshift({
+    date: new Date().toLocaleString('zh-CN'),
+    age: S.currentAge,
+    stage: STAGES[S.stage] || S.stage,
+    notes: S.notes,
+    state: deepClone(S)
+  });
+  if (snaps.length > 30) snaps.length = 30;
+  localStorage.setItem('lc_snaps', JSON.stringify(snaps));
+  showToast('快照已保存');
+}
+
+function showSnapshots() {
+  const modal = document.getElementById('snap-modal');
+  modal.style.display = 'flex';
+  const snaps = JSON.parse(localStorage.getItem('lc_snaps') || '[]');
+  const list = document.getElementById('snap-list');
+  const empty = document.getElementById('snap-empty');
+  if (!snaps.length) {
+    list.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  list.innerHTML = snaps.map((s, i) => `
+    <div style="background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;padding:12px">
+      <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:6px">
+        <div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--t2)">${s.date}</div>
+          <div style="font-size:12px;color:var(--t1);margin-top:3px">${s.age}岁 · ${s.stage}</div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="btn" onclick="loadSnapshot(${i})" style="font-size:11px;padding:3px 8px">恢复</button>
+          <button class="btn" onclick="deleteSnapshot(${i})" style="font-size:11px;padding:3px 8px;color:var(--rose)">删除</button>
+        </div>
+      </div>
+      ${s.notes ? `<div style="font-size:11px;color:var(--t2);border-top:1px solid var(--bd);padding-top:6px;margin-top:6px;line-height:1.5">${s.notes.slice(0,100)}${s.notes.length>100?'...':''}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+function loadSnapshot(i) {
+  const snaps = JSON.parse(localStorage.getItem('lc_snaps') || '[]');
+  if (snaps[i]) {
+    S = deepMerge(deepClone(DEFAULTS), snaps[i].state);
+    applyState();
+    refreshChart();
+    save();
+    document.getElementById('snap-modal').style.display = 'none';
+    showToast('快照已恢复');
+  }
+}
+
+function deleteSnapshot(i) {
+  const snaps = JSON.parse(localStorage.getItem('lc_snaps') || '[]');
+  snaps.splice(i, 1);
+  localStorage.setItem('lc_snaps', JSON.stringify(snaps));
+  showSnapshots();
+}
+
+// ════════════════════════════════════════════════
+// EXPORT / IMPORT
+// ════════════════════════════════════════════════
+function exportData() {
+  const data = {
+    version: '1.0',
+    exportedAt: new Date().toISOString(),
+    state: S,
+    snapshots: JSON.parse(localStorage.getItem('lc_snaps') || '[]')
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `life-curve-${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importData() {
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = '.json';
+  inp.onchange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        if (data.state) {
+          S = deepMerge(deepClone(DEFAULTS), data.state);
+        } else {
+          S = deepMerge(deepClone(DEFAULTS), data);
+        }
+        if (data.snapshots) {
+          localStorage.setItem('lc_snaps', JSON.stringify(data.snapshots));
+        }
+        applyState();
+        refreshChart();
+        save();
+        showToast('数据导入成功');
+      } catch (err) {
+        alert('文件解析失败，请检查格式');
+      }
+    };
+    reader.readAsText(file);
+  };
+  inp.click();
+}
+
+function resetAll() {
+  if (!confirm('确认重置所有设置和数据？')) return;
+  S = deepClone(DEFAULTS);
+  applyState();
+  refreshChart();
+  save();
+}
+
+// ════════════════════════════════════════════════
+// UTILS
+// ════════════════════════════════════════════════
+function deepClone(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+
+function deepMerge(target, source) {
+  const result = { ...target };
+  for (const key of Object.keys(source)) {
+    if (source[key] !== null && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+      result[key] = deepMerge(target[key] || {}, source[key]);
+    } else {
+      result[key] = source[key];
+    }
+  }
+  return result;
+}
+
+let toastTimer;
+function showToast(msg) {
+  let t = document.getElementById('toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'toast';
+    t.style.cssText = `
+      position:fixed;bottom:24px;right:24px;z-index:200;
+      background:var(--bg3);border:1px solid var(--bd2);
+      color:var(--green);padding:10px 18px;border-radius:8px;
+      font-family:'Barlow Condensed',sans-serif;font-size:13px;
+      font-weight:600;letter-spacing:.5px;
+      transition:opacity .3s;
+    `;
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.style.opacity = '0'; }, 2200);
+}
+
+// Close modal on backdrop click
+document.getElementById('snap-modal').addEventListener('click', function(e) {
+  if (e.target === this) this.style.display = 'none';
+});
+
+// ════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  load();
+  applyState();
+  buildAllData();
+  initChart();
+  wireControls();
+  refreshChart();
+});
+</script>
+</body>
+</html>

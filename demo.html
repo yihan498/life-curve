@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>人生曲线 · 思想演示</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:      #07090e;
+      --surface: #0e1118;
+      --border:  #1c2333;
+      --text:    #e8e0d0;
+      --text2:   #8090a8;
+      --text3:   #3e4d64;
+      --gold:    #c49a52;
+      --gold2:   #dbb368;
+      --gold-bg: rgba(196,154,82,0.08);
+      --c-employ:  #4a8fa8;
+      --c-pulse:   #c9614a;
+      --c-serial:  #5a8f6a;
+      --c-ai:      #8b62c4;
+      --c-capital: #b08040;
+      --c-comp:    #d4c8b0;
+      --font-d: 'Cormorant Garamond', Georgia, serif;
+      --font-u: 'DM Sans', system-ui, sans-serif;
+      --font-m: 'JetBrains Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 15px; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-u);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* ── NAV ── */
+    .nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: 56px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 48px;
+      background: rgba(7,9,14,0.85);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      backdrop-filter: blur(12px);
+    }
+    .nav-brand {
+      font-family: var(--font-d);
+      font-size: 18px; font-weight: 400;
+      color: var(--text);
+      letter-spacing: 0.02em;
+      text-decoration: none;
+    }
+    .nav-brand em { font-style: italic; color: var(--gold); }
+    .nav-link {
+      font-size: 13px; font-weight: 400;
+      color: var(--text2);
+      text-decoration: none;
+      border: 1px solid var(--border);
+      border-radius: 40px;
+      padding: 6px 18px;
+      transition: all 0.2s;
+    }
+    .nav-link:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* ── SECTIONS ── */
+    section {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 100px 48px 80px;
+      position: relative;
+    }
+
+    .section-inner {
+      width: 100%; max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* ── TYPOGRAPHY ── */
+    .eyebrow {
+      font-family: var(--font-m);
+      font-size: 11px; font-weight: 400;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 20px;
+      opacity: 0.7;
+    }
+
+    .display {
+      font-family: var(--font-d);
+      font-size: clamp(52px, 7vw, 88px);
+      font-weight: 300; line-height: 1.0;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      margin-bottom: 28px;
+    }
+    .display em { font-style: italic; color: var(--gold); }
+
+    .h2 {
+      font-family: var(--font-d);
+      font-size: clamp(36px, 4.5vw, 58px);
+      font-weight: 300; line-height: 1.1;
+      letter-spacing: -0.01em;
+      color: var(--text);
+      margin-bottom: 20px;
+    }
+    .h2 em { font-style: italic; color: var(--gold); }
+
+    .lead {
+      font-size: 16px; font-weight: 300;
+      color: var(--text2); line-height: 1.8;
+      max-width: 640px;
+      margin-bottom: 48px;
+    }
+
+    .body-text {
+      font-size: 15px; font-weight: 300;
+      color: var(--text2); line-height: 1.8;
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      width: 48px; height: 1px;
+      background: var(--gold);
+      opacity: 0.4;
+      margin: 28px 0;
+    }
+
+    /* ── HERO SECTION ── */
+    #hero {
+      background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(196,154,82,0.06) 0%, transparent 70%);
+      text-align: center;
+    }
+    #hero .lead { margin-left: auto; margin-right: auto; }
+
+    .hero-quote {
+      font-family: var(--font-d);
+      font-size: clamp(18px, 2.5vw, 26px);
+      font-style: italic;
+      color: rgba(196,154,82,0.65);
+      line-height: 1.6;
+      max-width: 680px;
+      margin: 0 auto 60px;
+      border-left: 2px solid rgba(196,154,82,0.3);
+      padding-left: 24px;
+      text-align: left;
+    }
+
+    .hero-stats {
+      display: flex; gap: 48px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .hero-stat { text-align: center; }
+    .hero-stat-num {
+      font-family: var(--font-d);
+      font-size: 56px; font-weight: 300;
+      color: var(--gold); line-height: 1;
+      letter-spacing: -0.02em;
+    }
+    .hero-stat-label {
+      font-family: var(--font-m);
+      font-size: 11px; color: var(--text3);
+      letter-spacing: 0.1em; text-transform: uppercase;
+      margin-top: 8px;
+    }
+
+    /* ── THREE ENTITIES ── */
+    #entities { background: var(--bg); }
+
+    .entity-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 48px;
+    }
+
+    .entity-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px 24px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s;
+    }
+    .entity-card:hover { border-color: rgba(196,154,82,0.3); }
+    .entity-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    }
+    .entity-card.human::before { background: #5a7a9a; }
+    .entity-card.company::before { background: var(--gold); }
+    .entity-card.ai::before { background: #8b62c4; }
+
+    .entity-icon {
+      font-size: 32px; margin-bottom: 16px; display: block;
+    }
+    .entity-name {
+      font-family: var(--font-d);
+      font-size: 28px; font-weight: 400;
+      color: var(--text); margin-bottom: 4px;
+    }
+    .entity-en {
+      font-family: var(--font-m);
+      font-size: 11px; color: var(--text3);
+      letter-spacing: 0.1em; text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .entity-curve {
+      height: 64px; margin-bottom: 20px;
+    }
+    .entity-traits { display: flex; flex-direction: column; gap: 8px; }
+    .entity-trait {
+      font-size: 13px; color: var(--text2);
+      display: flex; align-items: flex-start; gap: 8px;
+      line-height: 1.5;
+    }
+    .trait-icon {
+      font-size: 12px; margin-top: 2px; flex-shrink: 0;
+    }
+    .entity-verdict {
+      margin-top: 20px;
+      padding: 10px 14px;
+      background: var(--gold-bg);
+      border: 1px solid rgba(196,154,82,0.15);
+      border-radius: 6px;
+      font-family: var(--font-m);
+      font-size: 11.5px; color: var(--gold);
+      line-height: 1.5;
+    }
+
+    /* ── FIVE CURVES ── */
+    #curves { background: #050709; }
+
+    .curves-intro {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+      margin-bottom: 64px;
+    }
+
+    .curve-list { display: flex; flex-direction: column; gap: 14px; }
+
+    .curve-row {
+      display: grid;
+      grid-template-columns: 14px 100px 1fr;
+      gap: 14px;
+      align-items: center;
+      padding: 14px 18px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .curve-row:hover, .curve-row.active {
+      background: rgba(196,154,82,0.05);
+      border-color: rgba(196,154,82,0.2);
+    }
+
+    .curve-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .curve-name { font-size: 13.5px; font-weight: 500; color: var(--text); }
+    .curve-tagline { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+    .curve-arrow { font-size: 11px; color: var(--text3); margin-left: auto; }
+
+    .curve-detail-panel {
+      position: sticky; top: 80px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px;
+    }
+
+    .cdp-curve { height: 120px; margin-bottom: 20px; }
+
+    .cdp-name {
+      font-family: var(--font-d);
+      font-size: 28px; font-weight: 400;
+      margin-bottom: 4px;
+    }
+    .cdp-role {
+      font-family: var(--font-m);
+      font-size: 11px; color: var(--gold);
+      letter-spacing: 0.12em; text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .cdp-desc { font-size: 13.5px; color: var(--text2); line-height: 1.7; }
+    .cdp-insight {
+      margin-top: 16px;
+      padding: 12px 14px;
+      background: var(--gold-bg);
+      border-left: 2px solid var(--gold);
+      font-size: 13px; color: var(--gold);
+      line-height: 1.6; border-radius: 0 6px 6px 0;
+    }
+
+    /* ── COMPOUNDING ── */
+    #compounding {
+      background: radial-gradient(ellipse 100% 80% at 50% 100%, rgba(196,154,82,0.04) 0%, transparent 60%);
+    }
+
+    .compound-chart-wrap {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px 28px 20px;
+      margin-top: 48px;
+    }
+    .compound-chart-wrap canvas {
+      width: 100% !important;
+      height: 320px !important;
+    }
+
+    .compound-legend {
+      display: flex; flex-wrap: wrap; gap: 16px;
+      margin-top: 20px; justify-content: center;
+    }
+    .compound-legend-item {
+      display: flex; align-items: center; gap: 7px;
+      font-size: 12px; color: var(--text2);
+    }
+    .legend-line {
+      width: 24px; height: 2px; border-radius: 2px; flex-shrink: 0;
+    }
+    .legend-line.dashed {
+      background: repeating-linear-gradient(to right, currentColor 0, currentColor 4px, transparent 4px, transparent 8px);
+    }
+
+    .insight-boxes {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 32px;
+    }
+
+    .insight-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+    }
+    .insight-num {
+      font-family: var(--font-d);
+      font-size: 40px; font-weight: 300;
+      color: var(--gold); line-height: 1;
+      margin-bottom: 8px;
+    }
+    .insight-label {
+      font-size: 13px; color: var(--text2); line-height: 1.5;
+    }
+
+    /* ── HOW TO USE ── */
+    #howto { background: var(--bg); }
+
+    .steps {
+      display: flex; flex-direction: column;
+      gap: 0; margin-top: 48px;
+      position: relative;
+    }
+    .steps::before {
+      content: '';
+      position: absolute; left: 23px; top: 24px; bottom: 24px;
+      width: 1px; background: var(--border);
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      gap: 24px;
+      padding-bottom: 40px;
+      position: relative;
+    }
+    .step:last-child { padding-bottom: 0; }
+
+    .step-num {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-m);
+      font-size: 14px; font-weight: 500;
+      color: var(--gold);
+      flex-shrink: 0;
+      position: relative; z-index: 1;
+      transition: all 0.3s;
+    }
+    .step:hover .step-num {
+      background: var(--gold-bg);
+      border-color: var(--gold);
+    }
+
+    .step-content {
+      padding-top: 10px;
+    }
+    .step-title {
+      font-family: var(--font-d);
+      font-size: 22px; font-weight: 400;
+      color: var(--text); margin-bottom: 8px;
+    }
+    .step-desc {
+      font-size: 14px; color: var(--text2); line-height: 1.7;
+      margin-bottom: 12px;
+    }
+    .step-hint {
+      display: inline-block;
+      font-family: var(--font-m);
+      font-size: 11px; color: var(--text3);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px; padding: 4px 10px;
+    }
+    .step-mockup {
+      margin-top: 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-family: var(--font-m);
+      font-size: 12px; color: var(--text3);
+      line-height: 1.7;
+    }
+    .step-mockup .hl { color: var(--gold); }
+    .step-mockup .hl2 { color: var(--c-ai); }
+
+    /* ── CTA ── */
+    #cta {
+      min-height: 60vh;
+      background: radial-gradient(ellipse 80% 60% at 50% 50%, rgba(196,154,82,0.07) 0%, transparent 70%);
+      text-align: center;
+    }
+
+    .cta-btn {
+      display: inline-block;
+      font-family: var(--font-u);
+      font-size: 14px; font-weight: 500;
+      letter-spacing: 0.06em;
+      color: var(--gold);
+      background: transparent;
+      border: 1px solid rgba(196,154,82,0.5);
+      border-radius: 40px;
+      padding: 14px 44px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s;
+      margin-top: 40px;
+      display: inline-block;
+    }
+    .cta-btn:hover {
+      border-color: var(--gold);
+      box-shadow: 0 0 40px rgba(196,154,82,0.2);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 28px 48px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .footer-text {
+      font-family: var(--font-m);
+      font-size: 11px; color: var(--text3);
+      letter-spacing: 0.05em;
+    }
+
+    /* ── FADE IN ── */
+    .fade-in {
+      opacity: 0; transform: translateY(24px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+    .fade-in:nth-child(2) { transition-delay: 0.1s; }
+    .fade-in:nth-child(3) { transition-delay: 0.2s; }
+    .fade-in:nth-child(4) { transition-delay: 0.3s; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      section { padding: 80px 24px 60px; }
+      .entity-grid { grid-template-columns: 1fr; }
+      .curves-intro { grid-template-columns: 1fr; }
+      .insight-boxes { grid-template-columns: 1fr; }
+      .nav { padding: 0 24px; }
+      footer { flex-direction: column; gap: 12px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a class="nav-brand" href="index.html">人生曲线 <em>·</em> 思想演示</a>
+  <a class="nav-link" href="index.html">进入工具 →</a>
+</nav>
+
+<!-- ══════════════════════════════════════════════
+  SECTION 1 · HERO
+══════════════════════════════════════════════ -->
+<section id="hero">
+  <div class="section-inner" style="text-align:center;">
+    <div class="eyebrow fade-in">Life Framework · 2026</div>
+
+    <div class="display fade-in">
+      把时间精力<br>投入到<em>生命力</em><br>更旺盛的主体中
+    </div>
+
+    <div class="hero-quote fade-in">
+      苹果才50周年——公司才正儿八经发展30多年，就已经是这个规模。<br>
+      而人前25年几乎零产出。同样的时间尺度，差异为何如此悬殊？
+    </div>
+
+    <div class="hero-stats fade-in">
+      <div class="hero-stat">
+        <div class="hero-stat-num" data-count="25">0</div>
+        <div class="hero-stat-label">人类积累年限（无产出）</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num" data-count="3" data-suffix="年">0</div>
+        <div class="hero-stat-label">公司出道即巅峰</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num" data-count="0" data-suffix="秒">0</div>
+        <div class="hero-stat-label">AI 知识拉满所需时间</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+  SECTION 2 · THREE ENTITIES
+══════════════════════════════════════════════ -->
+<section id="entities">
+  <div class="section-inner">
+    <div class="eyebrow fade-in">主体生命力对比</div>
+    <div class="h2 fade-in">三种主体，三种<em>生命力</em></div>
+    <p class="lead fade-in">
+      人、公司、AI 都是可以承载时间精力的主体。<br>
+      但它们天生的生命力旺盛程度截然不同。
+    </p>
+
+    <div class="entity-grid">
+      <!-- Human -->
+      <div class="entity-card human fade-in">
+        <span class="entity-icon">🧑</span>
+        <div class="entity-name">人</div>
+        <div class="entity-en">Human</div>
+        <svg class="entity-curve" viewBox="0 0 200 64" preserveAspectRatio="none">
+          <!-- flat 25yr, rise to 35, decline -->
+          <polyline points="0,60 50,60 70,20 100,16 140,40 180,58 200,60"
+            fill="none" stroke="#5a7a9a" stroke-width="2" stroke-linejoin="round"/>
+          <text x="2" y="62" font-size="8" fill="#5a7a9a" opacity="0.5" font-family="monospace">0岁</text>
+          <text x="47" y="58" font-size="8" fill="#5a7a9a" opacity="0.5" font-family="monospace">25</text>
+          <text x="88" y="14" font-size="8" fill="#5a7a9a" opacity="0.5" font-family="monospace">35</text>
+          <text x="172" y="56" font-size="8" fill="#5a7a9a" opacity="0.5" font-family="monospace">60</text>
+        </svg>
+        <div class="entity-traits">
+          <div class="entity-trait">
+            <span class="trait-icon">⏳</span>
+            前25年零产出，等待积累
+          </div>
+          <div class="entity-trait">
+            <span class="trait-icon">📉</span>
+            巅峰维持时间极短
+          </div>
+          <div class="entity-trait">
+            <span class="trait-icon">🔗</span>
+            无天然杠杆，线性增长
+          </div>
+        </div>
+        <div class="entity-verdict">≈ 生命力较弱，时间浪费多</div>
+      </div>
+
+      <!-- Company -->
+      <div class="entity-card company fade-in">
+        <span class="entity-icon">🏢</span>
+        <div class="entity-name">公司</div>
+        <div class="entity-en">Company</div>
+        <svg class="entity-curve" viewBox="0 0 200 64" preserveAspectRatio="none">
+          <!-- starts high, stays high, then grows -->
+          <polyline points="0,58 5,14 30,10 60,8 100,7 140,5 180,4 200,3"
+            fill="none" stroke="#c49a52" stroke-width="2" stroke-linejoin="round"/>
+          <text x="2" y="54" font-size="8" fill="#c49a52" opacity="0.5" font-family="monospace">成立</text>
+          <text x="4" y="12" font-size="8" fill="#c49a52" opacity="0.5" font-family="monospace">↑</text>
+          <text x="90" y="4" font-size="8" fill="#c49a52" opacity="0.5" font-family="monospace">持续增长</text>
+        </svg>
+        <div class="entity-traits">
+          <div class="entity-trait">
+            <span class="trait-icon">🚀</span>
+            出道即巅峰，无等待期
+          </div>
+          <div class="entity-trait">
+            <span class="trait-icon">⚙️</span>
+            自带飞轮效应，越转越快
+          </div>
+          <div class="entity-trait">
+            <span class="trait-icon">🏗️</span>
+            天生有杠杆（人、钱、品牌）
+          </div>
+        </div>
+        <div class="entity-verdict">≈ 生命力旺盛，值得重点投入</div>
+      </div>
+
+      <!-- AI -->
+      <div class="entity-card ai fade-in">
+        <span class="entity-icon">🤖</span>
+        <div class="entity-name">AI</div>
+        <div class="entity-en">Artificial Intelligence</div>
+        <svg class="entity-curve" viewBox="0 0 200 64" preserveAspectRatio="none">
+          <!-- flat then instant jump then linear rise -->
+          <polyline points="0,60 60,60 65,12 80,10 120,7 160,5 200,3"
+            fill="none" stroke="#8b62c4" stroke-width="2" stroke-linejoin="round"/>
+          <text x="28" y="58" font-size="8" fill="#8b62c4" opacity="0.5" font-family="monospace">采用AI</text>
+          <text x="63" y="10" font-size="8" fill="#8b62c4" opacity="0.5" font-family="monospace">↑ 跃迁</text>
+          <text x="130" y="4" font-size="8" fill="#8b62c4" opacity="0.5" font-family="monospace">持续增长</text>
+        </svg>
+        <div class="entity-traits">
+          <div class="entity-trait">
+            <span class="trait-icon">⚡</span>
+            采用即跃迁，知识秒拉满
+          </div>
+          <div class="entity-trait">
+            <span class="trait-icon">🧠</span>
+            越用越强，自我迭代
+          </div>
+          <div class="entity-trait">
+            <span class="trait-icon">♾️</span>
+            第四类杠杆：纯粹智能杠杆
+          </div>
+        </div>
+        <div class="entity-verdict">≈ 生命力最强，时代级机会</div>
+      </div>
+    </div>
+
+    <div style="margin-top:48px; padding:24px; background:var(--gold-bg); border:1px solid rgba(196,154,82,0.2); border-radius:12px; text-align:center;">
+      <div class="body-text" style="color:var(--text); font-size:17px; line-height:1.8;">
+        结论：<strong style="color:var(--gold)">人生主线 = 把有限的时间精力，投入到生命力天然更旺盛的主体中</strong><br>
+        <span style="font-size:14px; color:var(--text2);">不是投入"自己"，而是投入"公司"和"AI"这两个更强的载体</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+  SECTION 3 · FIVE CURVES
+══════════════════════════════════════════════ -->
+<section id="curves">
+  <div class="section-inner">
+    <div class="eyebrow fade-in">图形化人生框架</div>
+    <div class="h2 fade-in">五条曲线，<em>叠成</em>人生地图</div>
+    <p class="lead fade-in" style="margin-bottom:0;">
+      将不同主体的贡献转化为可视化曲线，每条线代表一种人生策略的生命力输出。
+    </p>
+
+    <div class="curves-intro" style="margin-top:48px;">
+      <!-- Left: curve selector -->
+      <div>
+        <div class="curve-list" id="curve-list">
+          <div class="curve-row active" data-curve="employ" onclick="selectCurve('employ')">
+            <div class="curve-dot" style="background:var(--c-employ);box-shadow:0 0 6px var(--c-employ)88;"></div>
+            <div>
+              <div class="curve-name">传统就业</div>
+              <div class="curve-tagline">低保 · 白嫖保险</div>
+            </div>
+            <span class="curve-arrow">›</span>
+          </div>
+          <div class="curve-row" data-curve="pulse" onclick="selectCurve('pulse')">
+            <div class="curve-dot" style="background:var(--c-pulse);box-shadow:0 0 6px var(--c-pulse)88;"></div>
+            <div>
+              <div class="curve-name">创业脉冲</div>
+              <div class="curve-tagline">ECG突破 · 高波动高潜力</div>
+            </div>
+            <span class="curve-arrow">›</span>
+          </div>
+          <div class="curve-row" data-curve="serial" onclick="selectCurve('serial')">
+            <div class="curve-dot" style="background:var(--c-serial);box-shadow:0 0 6px var(--c-serial)88;"></div>
+            <div>
+              <div class="curve-name">连续创业</div>
+              <div class="curve-tagline">7年周期 · 底板递升</div>
+            </div>
+            <span class="curve-arrow">›</span>
+          </div>
+          <div class="curve-row" data-curve="ai" onclick="selectCurve('ai')">
+            <div class="curve-dot" style="background:var(--c-ai);box-shadow:0 0 6px var(--c-ai)88;"></div>
+            <div>
+              <div class="curve-name">AI 协作</div>
+              <div class="curve-tagline">能力跃迁 · 越用越强</div>
+            </div>
+            <span class="curve-arrow">›</span>
+          </div>
+          <div class="curve-row" data-curve="capital" onclick="selectCurve('capital')">
+            <div class="curve-dot" style="background:var(--c-capital);box-shadow:0 0 6px var(--c-capital)88;"></div>
+            <div>
+              <div class="curve-name">资本复利</div>
+              <div class="curve-tagline">永久托底 · 抹平波动</div>
+            </div>
+            <span class="curve-arrow">›</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: detail panel -->
+      <div class="curve-detail-panel" id="curve-detail">
+        <canvas id="curve-mini-chart" class="cdp-curve"></canvas>
+        <div class="cdp-name" id="cdp-name">传统就业</div>
+        <div class="cdp-role" id="cdp-role">TRADITIONAL EMPLOYMENT</div>
+        <div class="cdp-desc" id="cdp-desc"></div>
+        <div class="cdp-insight" id="cdp-insight"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+  SECTION 4 · COMPOUNDING
+══════════════════════════════════════════════ -->
+<section id="compounding">
+  <div class="section-inner">
+    <div class="eyebrow fade-in">核心机制</div>
+    <div class="h2 fade-in">叠加之后，<em>永久牛市</em></div>
+    <p class="lead fade-in">
+      五条曲线叠加，资本复利填平连续创业的波谷。<br>
+      数学上保证：<strong style="color:var(--gold)">每个低点都高于前一个低点</strong>——你永远不会回到起点。
+    </p>
+
+    <div class="compound-chart-wrap fade-in">
+      <canvas id="compound-chart"></canvas>
+      <div class="compound-legend">
+        <div class="compound-legend-item">
+          <div class="legend-line" style="background:var(--c-employ); height:1.5px;"></div>传统就业
+        </div>
+        <div class="compound-legend-item">
+          <div class="legend-line" style="background:var(--c-pulse); height:1.5px;"></div>创业脉冲
+        </div>
+        <div class="compound-legend-item">
+          <div class="legend-line" style="background:var(--c-serial); height:1.5px;"></div>连续创业
+        </div>
+        <div class="compound-legend-item">
+          <div class="legend-line" style="background:var(--c-ai); height:1.5px;"></div>AI协作
+        </div>
+        <div class="compound-legend-item">
+          <div class="legend-line" style="background:var(--c-capital); height:1.5px;"></div>资本复利
+        </div>
+        <div class="compound-legend-item">
+          <div class="legend-line" style="background:var(--c-comp); height:3px;"></div>
+          <strong>综合指数</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="insight-boxes" style="margin-top:32px;">
+      <div class="insight-box fade-in">
+        <div class="insight-num">7</div>
+        <div class="insight-label">年一个创业周期<br>越过三关底板就永久安全</div>
+      </div>
+      <div class="insight-box fade-in">
+        <div class="insight-num" style="color:var(--c-ai);">∞</div>
+        <div class="insight-label">AI协作的复利增长<br>使用越深，能力飞轮越快</div>
+      </div>
+      <div class="insight-box fade-in">
+        <div class="insight-num" style="color:var(--c-capital);">↗</div>
+        <div class="insight-label">资本兜底后<br>任何低点都不低于历史低点</div>
+      </div>
+    </div>
+
+    <div style="margin-top:40px; padding:28px 32px; background:var(--surface); border:1px solid var(--border); border-radius:12px;">
+      <div class="body-text" style="font-size:14.5px; line-height:2.0;">
+        <strong style="color:var(--text); font-size:16px;">为什么叫"永久牛市"？</strong><br><br>
+        <span style="color:var(--text2);">
+        连续创业过程中每次"低谷"都需要资金撑过去。当你将创业赚到的第一桶金配置到
+        <span style="color:var(--c-capital);">资本复利</span>后，它产生的被动收益就能覆盖低谷期的生活成本——
+        低谷的<em style="color:var(--gold);">绝对值</em>不可能低于上次低谷。<br><br>
+        同时，<span style="color:var(--c-ai);">AI协作</span>确保了你在每次低谷期仍在能力上持续积累，
+        而<span style="color:var(--c-serial);">连续创业</span>的底板本身也在每个周期后抬升。<br><br>
+        三者叠加，从数学上<span style="color:var(--gold);">保证了曲线只可能向上</span>，而不可能回到原点。
+        </span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+  SECTION 5 · HOW TO USE
+══════════════════════════════════════════════ -->
+<section id="howto">
+  <div class="section-inner">
+    <div class="eyebrow fade-in">工具使用指南</div>
+    <div class="h2 fade-in">四步开始<em>你的</em>人生曲线</div>
+    <p class="lead fade-in">
+      工具不是用来预测未来的——它是你定期校准人生方向的仪表盘。
+    </p>
+
+    <div class="steps">
+      <!-- Step 1 -->
+      <div class="step fade-in">
+        <div class="step-num">01</div>
+        <div class="step-content">
+          <div class="step-title">设置你的当前位置</div>
+          <div class="step-desc">
+            在「今日」页面，拖动年龄滑块到你的真实年龄，选择你所处的人生阶段。
+            这是整个图表的锚点——所有曲线都从你的真实位置出发。
+          </div>
+          <div class="step-mockup">
+            当前年龄 <span class="hl">26</span> 岁 · 阶段 <span class="hl">🚀 加速期</span><br>
+            综合活力指数：<span class="hl">42.3</span> / 100
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step fade-in">
+        <div class="step-num">02</div>
+        <div class="step-content">
+          <div class="step-title">校准五条曲线参数</div>
+          <div class="step-desc">
+            在「设置」页面，根据你的真实情况调整每条曲线的参数：
+            你现在的收入水平、创业频率与成功率、开始用AI的年龄、投资本金与年化收益率。
+            目标是让图形接近你的现实，而不是最优解。
+          </div>
+          <div class="step-mockup">
+            传统就业 → 22岁入职 · 巅峰 35岁 · 退休 60岁<br>
+            创业脉冲 → 20岁起 · <span class="hl">12次</span>尝试 · 成功率 <span class="hl">30%</span><br>
+            AI协作 → <span class="hl2">24岁</span>采用 · 协作深度 <span class="hl2">65%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step fade-in">
+        <div class="step-num">03</div>
+        <div class="step-content">
+          <div class="step-title">记录里程碑与日志</div>
+          <div class="step-desc">
+            在「记录」页面，添加你的人生关键节点（目标和已完成的事件），
+            定期写日志记录当下的想法与进展。这是让工具有「记忆」的关键。
+          </div>
+          <div class="step-mockup">
+            <span class="hl">age 26</span> → 达成第一个创业脉冲赚钱 ✓<br>
+            <span class="hl">age 28</span> → 目标：资本复利月被动收入破万<br>
+            <span class="hl">age 35</span> → 目标：完成第二次平台跃升
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="step fade-in">
+        <div class="step-num">04</div>
+        <div class="step-content">
+          <div class="step-title">定期保存快照，对比成长</div>
+          <div class="step-desc">
+            每季度保存一次快照，重大事件后更新对应曲线参数。
+            年底时对比快照，看看你的综合指数是否在上升，
+            「牛市状态」是否保持 ✓。建议同时导出 Markdown 报告到本地留档。
+          </div>
+          <span class="step-hint">设置 → 保存快照 → 导出报告（Markdown）</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Key principles -->
+    <div style="margin-top:56px; display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+      <div style="padding:20px; background:var(--surface); border:1px solid var(--border); border-radius:10px;">
+        <div style="font-family:var(--font-m); font-size:11px; color:var(--gold); margin-bottom:10px; letter-spacing:0.1em;">正确姿势</div>
+        <div style="font-size:13px; color:var(--text2); line-height:1.8;">
+          ✓ 把工资当低保，主要精力投在创业脉冲<br>
+          ✓ 赚到第一桶金立即配置资本复利<br>
+          ✓ 每天烧 token 深度使用 AI<br>
+          ✓ 失败了继续脉冲，不亏到前一个低点就是赢
+        </div>
+      </div>
+      <div style="padding:20px; background:var(--surface); border:1px solid var(--border); border-radius:10px;">
+        <div style="font-family:var(--font-m); font-size:11px; color:#c64; margin-bottom:10px; letter-spacing:0.1em;">需要避免</div>
+        <div style="font-size:13px; color:var(--text2); line-height:1.8;">
+          ✗ 把工资看成安身立命的根本<br>
+          ✗ 没有资本复利就全力创业赌博<br>
+          ✗ 忘了还有 AI 协作这条曲线<br>
+          ✗ 因为一两次脉冲失败就放弃这个框架
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+  SECTION 6 · CTA
+══════════════════════════════════════════════ -->
+<section id="cta">
+  <div class="section-inner" style="text-align:center;">
+    <div class="eyebrow fade-in">现在开始</div>
+    <div class="display fade-in" style="font-size:clamp(42px,6vw,72px);">
+      你的人生曲线<br>在<em>等你来画</em>
+    </div>
+    <p class="lead fade-in" style="margin:0 auto 0; text-align:center;">
+      理想的人生不是规划出来的，<br>
+      但有框架的人，在每一个岔路口都会做出更清醒的选择。
+    </p>
+    <a href="index.html" class="cta-btn fade-in">进入工具，开始规划 →</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-text">人生曲线 · Life Picture · 基于「有趣的图形化人生框架」2026.4.12</div>
+  <div class="footer-text">数据本地存储 · 无服务器 · 无追踪</div>
+</footer>
+
+<!-- ══ SCRIPTS ══ -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+'use strict';
+
+/* ── CURVE DATA DEFINITIONS ─────────────────────────────── */
+const CURVE_DATA = {
+  employ: {
+    name: '传统就业',
+    role: 'TRADITIONAL EMPLOYMENT · 低保',
+    color: '#4a8fa8',
+    desc: '从22岁入职开始，收入线性爬升至35岁巅峰，之后随精力下降线性减少，退休时归零。它不是财富自由的路径，而是稳定现金流的基础。',
+    insight: '策略：把工资当"低保"，白嫖老板的保险和福利，剩余精力全投创业脉冲和AI协作。',
+    pts: (n) => Array.from({length:n},(_,i)=>{const x=i/n;return x<0.1?0:x<0.27?((x-0.1)/0.17):x<0.65?(1-(x-0.27)/0.38)*0.92:0;}),
+  },
+  pulse: {
+    name: '创业脉冲',
+    role: 'STARTUP PULSES · ECG模式',
+    color: '#c9614a',
+    desc: '连续的不对称脉冲：失败的尝试快速消退（小幅窄脉冲），成功的业务缓慢回落（大幅宽脉冲）。整体像心电图——没有成功不重要，关键是保持脉动。',
+    insight: '策略：只要亏损不超过当前本金，继续脉冲就不是失败。目标是找到那个让你稳赚3-5年的脉冲。',
+    pts: (n) => {
+      const peaks = [{c:0.18,a:0.22,fw:0.04},{c:0.28,a:0.75,fw:0.06},{c:0.38,a:0.18,fw:0.03},{c:0.48,a:0.28,fw:0.03},{c:0.57,a:0.82,fw:0.08},{c:0.68,a:0.2,fw:0.03},{c:0.76,a:0.55,fw:0.06}];
+      return Array.from({length:n},(_,i)=>{const x=i/n;let v=0;for(const p of peaks){const dt=x-p.c;const fw=dt<0?0.02:p.fw;v=Math.max(v,p.a*Math.exp(-dt*dt/(fw*fw*2)));}return v;});
+    },
+  },
+  serial: {
+    name: '连续创业',
+    role: 'SERIAL ENTREPRENEURSHIP · 7年周期',
+    color: '#5a8f6a',
+    desc: '以7年为一个周期：前2年探索尝试，中间3-4年稳定赚钱，最后1年回落但落点比上个周期高。关键规律：每轮新底板 > 上轮底板。',
+    insight: '策略：每轮低谷期用资本复利的被动收入覆盖生活成本，确保底板不低于上次。三轮之后底板已经足够高。',
+    pts: (n) => {
+      const cycles=[{s:0.12,e:0.39,p:0.45,f:0.08,nf:0.18},{s:0.39,e:0.61,p:0.65,f:0.18,nf:0.30},{s:0.61,e:0.82,p:0.83,f:0.30,nf:0.44}];
+      return Array.from({length:n},(_,i)=>{const x=i/n;if(x<0.12)return 0;for(const c of cycles){if(x>=c.s&&x<c.e){const t=(x-c.s)/(c.e-c.s);if(t<0.3)return c.f+(c.p*0.6-c.f)*(t/0.3);if(t<0.7)return c.p*0.6+(c.p-c.p*0.6)*((t-0.3)/0.4);return c.p+(c.nf-c.p)*((t-0.7)/0.3);}}return 0.44;});
+    },
+  },
+  ai: {
+    name: 'AI 协作',
+    role: 'AI COLLABORATION · 智能跃迁',
+    color: '#8b62c4',
+    desc: '开始使用AI的那一刻，能力近乎垂直跃升至新平台——这不是隐喻，是真实发生在你工作效率上的量变。之后随着协作深度增加，持续线性增长。',
+    insight: '策略：每天烧token，越用越强。AI是第四类杠杆——纯粹的智能杠杆，边际成本接近零。',
+    pts: (n) => Array.from({length:n},(_,i)=>{const x=i/n;if(x<0.22)return 0;const t=x-0.22;const jump=0.52/(1+Math.exp(-35*(t-0.012)));return Math.min(0.96,jump+t*0.65);}),
+  },
+  capital: {
+    name: '资本复利',
+    role: 'CAPITAL COMPOUNDING · 永久托底',
+    color: '#b08040',
+    desc: '把创业赚到的钱配置到优质资产，指数级增长——越早开始越有效。65岁后转为保守管理，曲线走平（不下降），成为创业脉冲最坚实的安全网。',
+    insight: '策略：第一桶金到手立即配置，不要等"等有更多钱再投"。哪怕月被动收入只有2000，也能覆盖创业低谷期的心理压力。',
+    pts: (n) => Array.from({length:n},(_,i)=>{const x=i/n;if(x<0.2)return 0;const t=x-0.2;const v=Math.min(0.88,0.025*Math.pow(1.06,t*50));return x>0.72?0.88:v;}),
+  },
+};
+
+/* ── MINI CHART FOR CURVE DETAIL ────────────────────────── */
+let miniChart = null;
+
+function selectCurve(key) {
+  document.querySelectorAll('.curve-row').forEach(el => el.classList.remove('active'));
+  document.querySelector(`[data-curve="${key}"]`).classList.add('active');
+
+  const d = CURVE_DATA[key];
+  document.getElementById('cdp-name').textContent = d.name;
+  document.getElementById('cdp-role').textContent = d.role;
+  document.getElementById('cdp-desc').textContent = d.desc;
+  document.getElementById('cdp-insight').textContent = d.insight;
+
+  const n = 80;
+  const pts = d.pts(n);
+  const labels = Array.from({length:n}, (_,i) => '');
+
+  if (miniChart) { miniChart.destroy(); miniChart = null; }
+
+  const canvas = document.getElementById('curve-mini-chart');
+  miniChart = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data: pts.map(v => v * 100),
+        borderColor: d.color,
+        borderWidth: 2,
+        pointRadius: 0,
+        fill: true,
+        backgroundColor: d.color + '15',
+        tension: 0.35,
+      }]
+    },
+    options: {
+      animation: { duration: 500 },
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
+      scales: {
+        x: { display: false },
+        y: { display: false, min: 0, max: 100 },
+      },
+    }
+  });
+}
+
+/* ── COMPOUND CHART ─────────────────────────────────────── */
+function buildCompoundChart() {
+  const n = 120;
+  const ages = Array.from({length:n}, (_,i) => Math.round(15 + i * 65/n));
+  const keys = ['employ','pulse','serial','ai','capital'];
+  const allPts = {};
+  keys.forEach(k => { allPts[k] = CURVE_DATA[k].pts(n).map(v => v*100); });
+
+  // composite = weighted average + slight boost
+  const comp = Array.from({length:n},(_,i)=>{
+    const vals = keys.map(k => allPts[k][i]);
+    const w = [0.10, 0.15, 0.28, 0.22, 0.25];
+    return vals.reduce((s,v,j) => s + v*w[j], 0);
+  });
+
+  const ctx = document.getElementById('compound-chart').getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: ages,
+      datasets: [
+        { label: '传统就业', data: allPts.employ, borderColor:'#4a8fa8', borderWidth:1.5, pointRadius:0, tension:0.4, fill:false },
+        { label: '创业脉冲', data: allPts.pulse, borderColor:'#c9614a', borderWidth:1.5, pointRadius:0, tension:0.2, fill:false },
+        { label: '连续创业', data: allPts.serial, borderColor:'#5a8f6a', borderWidth:1.5, pointRadius:0, tension:0.4, fill:false },
+        { label: 'AI协作', data: allPts.ai, borderColor:'#8b62c4', borderWidth:1.5, pointRadius:0, tension:0.4, fill:false },
+        { label: '资本复利', data: allPts.capital, borderColor:'#b08040', borderWidth:1.5, pointRadius:0, tension:0.4, fill:false },
+        { label: '综合指数', data: comp, borderColor:'#d4c8b0', borderWidth:3, pointRadius:0, tension:0.4,
+          fill: { target: 'origin', above: 'rgba(212,200,176,0.06)' } },
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#0e1118',
+          borderColor: '#1c2333',
+          borderWidth: 1,
+          titleColor: '#e8e0d0',
+          bodyColor: '#8090a8',
+          titleFont: { family: 'JetBrains Mono', size: 11 },
+          bodyFont: { family: 'JetBrains Mono', size: 11 },
+          callbacks: {
+            title: (items) => `age ${items[0].label}`,
+            label: (item) => ` ${item.dataset.label}: ${item.raw.toFixed(1)}`,
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          ticks: { color: '#3e4d64', font: { family: 'JetBrains Mono', size: 10 }, maxTicksLimit: 8 }
+        },
+        y: {
+          min: 0, max: 100,
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          ticks: { color: '#3e4d64', font: { family: 'JetBrains Mono', size: 10 } }
+        }
+      }
+    }
+  });
+}
+
+/* ── COUNTER ANIMATION ──────────────────────────────────── */
+function animateCounters() {
+  document.querySelectorAll('[data-count]').forEach(el => {
+    const target = +el.dataset.count;
+    const suffix = el.dataset.suffix || '';
+    let current = 0;
+    const step = target / 40;
+    const timer = setInterval(() => {
+      current = Math.min(target, current + step);
+      el.textContent = Math.round(current) + suffix;
+      if (current >= target) clearInterval(timer);
+    }, 30);
+  });
+}
+
+/* ── INTERSECTION OBSERVER ──────────────────────────────── */
+function initObserver() {
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        if (e.target.id === 'hero') animateCounters();
+      }
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('.fade-in, section').forEach(el => io.observe(el));
+}
+
+/* ── INIT ───────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+  selectCurve('employ');
+  buildCompoundChart();
+  initObserver();
+});
+</script>
+</body>
+</html>

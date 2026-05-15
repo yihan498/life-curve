@@ -3,1517 +3,2527 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>人生曲线 · Life Trajectory</title>
+  <title>人生曲线 · Life Picture</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js" onerror="window._annotationFailed=true"></script>
 
   <style>
-    /* ── TOKENS ─────────────────────────────────────────── */
+    /* ══ DESIGN TOKENS ══════════════════════════════════════════════════════ */
     :root {
-      --bg0: #04080f;
-      --bg1: #080e1a;
-      --bg2: #0d1525;
-      --bg3: #122035;
-      --bd:  #162840;
-      --bd2: #1e3555;
-      --t0:  #dce9fd;
-      --t1:  #7a9dbf;
-      --t2:  #3d5e7c;
+      --bg:        #f4efe7;
+      --surface:   #ffffff;
+      --surface2:  #faf7f2;
+      --border:    #ddd5c8;
+      --border2:   #e8e0d4;
+      --text:      #1a1714;
+      --text2:     #6b6057;
+      --text3:     #9e9088;
+      --accent:    #b08040;
+      --accent2:   #8c6428;
+      --accent-bg: #f5eddc;
 
-      --cyan:   #00d9ff;
-      --orange: #ff6b35;
-      --purple: #a855f7;
-      --gold:   #f5a623;
-      --green:  #00d9a0;
-      --rose:   #ff4b6e;
-      --white:  #f0f6ff;
+      /* Chart dark theme */
+      --chart-bg:  #080b12;
+      --chart-bg2: #0d1520;
+      --chart-bd:  #162840;
 
-      --c-employ:    #5b8fbf;
-      --c-pulse:     #ff6b35;
-      --c-serial:    #00d9ff;
-      --c-ai:        #a855f7;
-      --c-capital:   #f5a623;
-      --c-composite: #f0f6ff;
+      /* Curve colors */
+      --c-employ:    #4a8fa8;
+      --c-pulse:     #c9614a;
+      --c-serial:    #5a8f6a;
+      --c-ai:        #8b62c4;
+      --c-capital:   #b08040;
+      --c-composite: #d4c8b8;
 
-      --r: 8px;
-      --sidebar: 270px;
-      --panel: 230px;
+      --font-display: 'Cormorant Garamond', Georgia, serif;
+      --font-ui:      'DM Sans', system-ui, sans-serif;
+      --font-mono:    'JetBrains Mono', monospace;
+
+      --radius:    6px;
+      --radius-lg: 12px;
+      --shadow:    0 1px 4px rgba(26,23,20,0.08), 0 4px 16px rgba(26,23,20,0.04);
+      --shadow-lg: 0 2px 8px rgba(26,23,20,0.10), 0 8px 32px rgba(26,23,20,0.06);
     }
 
+    /* ══ RESET ══════════════════════════════════════════════════════════════ */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { font-size: 13px; }
+    html { font-size: 14px; scroll-behavior: smooth; }
 
     body {
-      background: var(--bg0);
-      color: var(--t0);
-      font-family: 'Barlow', sans-serif;
-      line-height: 1.5;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-ui);
+      font-size: 14px;
+      line-height: 1.6;
       min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ══ SCROLLBAR ══════════════════════════════════════════════════════════ */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+    /* ══ NAV ════════════════════════════════════════════════════════════════ */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+      height: 56px;
+      gap: 0;
+    }
+
+    .nav-brand {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: 0.02em;
+      margin-right: 40px;
+      white-space: nowrap;
+      text-decoration: none;
+    }
+
+    .nav-brand span {
+      color: var(--accent);
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 0;
+      flex: 1;
+    }
+
+    .nav-tab {
+      font-family: var(--font-ui);
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--text3);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0 18px;
+      height: 56px;
+      position: relative;
+      transition: color 0.2s;
+      letter-spacing: 0.01em;
+      white-space: nowrap;
+    }
+
+    .nav-tab:hover { color: var(--text); }
+
+    .nav-tab.active {
+      color: var(--accent);
+    }
+
+    .nav-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 18px;
+      right: 18px;
+      height: 2px;
+      background: var(--accent);
+      border-radius: 2px 2px 0 0;
+    }
+
+    .nav-meta {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-age-badge {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--accent);
+      background: var(--accent-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 3px 12px;
+    }
+
+    /* ══ PAGES ══════════════════════════════════════════════════════════════ */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ══ PAGE: TODAY ════════════════════════════════════════════════════════ */
+    .today-wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 40px 32px 80px;
+    }
+
+    /* Hero */
+    .hero {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 40px;
+      align-items: center;
+      padding: 40px 48px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      margin-bottom: 32px;
+      box-shadow: var(--shadow);
+      position: relative;
       overflow: hidden;
     }
 
-    /* ── LAYOUT ──────────────────────────────────────────── */
-    .app {
-      display: grid;
-      grid-template-rows: 54px 1fr;
-      height: 100vh;
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 300px; height: 100%;
+      background: linear-gradient(135deg, transparent, var(--accent-bg));
+      pointer-events: none;
+      opacity: 0.5;
     }
 
-    /* HEADER */
-    .header {
+    .hero-age {
+      font-family: var(--font-display);
+      font-size: 96px;
+      font-weight: 300;
+      line-height: 1;
+      color: var(--text);
+      letter-spacing: -0.02em;
+    }
+
+    .hero-age-label {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--text3);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    .hero-info {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .hero-date {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 400;
+      color: var(--text);
+      font-style: italic;
+    }
+
+    .hero-stage-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--accent);
+      background: var(--accent-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 4px 10px;
+      width: fit-content;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .hero-stage-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.7); }
+    }
+
+    .hero-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-width: 200px;
+    }
+
+    .ctrl-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .ctrl-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text3);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    /* ══ FORM ELEMENTS ══════════════════════════════════════════════════════ */
+    input[type="range"] {
+      width: 100%;
+      height: 4px;
+      appearance: none;
+      background: var(--border);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      border: 2px solid var(--surface);
+      box-shadow: 0 0 0 2px var(--accent);
+      transition: transform 0.15s;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+    select, input[type="text"], textarea {
+      width: 100%;
+      font-family: var(--font-ui);
+      font-size: 13px;
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 7px 10px;
+      outline: none;
+      transition: border-color 0.2s;
+      appearance: none;
+    }
+
+    select:focus, input[type="text"]:focus, textarea:focus {
+      border-color: var(--accent);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+      line-height: 1.6;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-family: var(--font-ui);
+      font-size: 13px;
+      font-weight: 500;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      padding: 8px 16px;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-primary:hover { background: var(--accent2); }
+
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--surface2);
+      border-color: var(--text3);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text2);
+      border: 1px solid transparent;
+    }
+
+    .btn-ghost:hover {
+      background: var(--surface2);
+      border-color: var(--border);
+    }
+
+    .btn-sm { font-size: 12px; padding: 5px 11px; }
+    .btn-xs { font-size: 11px; padding: 3px 8px; }
+
+    /* ══ SECTION LAYOUT ═════════════════════════════════════════════════════ */
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--text);
+      letter-spacing: 0.01em;
+      margin-bottom: 16px;
+    }
+
+    .section-subtitle {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text3);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    /* ══ CURVE STATUS CARDS ════════════════════════════════════════════════ */
+    .curve-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .curve-card {
+      display: grid;
+      grid-template-columns: 120px 1fr 48px;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      transition: border-color 0.2s;
+    }
+
+    .curve-card:hover { border-color: var(--border); }
+
+    .curve-card-name {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text);
       display: flex;
       align-items: center;
-      gap: 20px;
-      padding: 0 20px;
-      background: var(--bg1);
-      border-bottom: 1px solid var(--bd);
+      gap: 7px;
+    }
+
+    .curve-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .curve-bar-wrap {
+      height: 4px;
+      background: var(--border2);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .curve-bar {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.4s ease;
+    }
+
+    .curve-val {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text2);
+      text-align: right;
+    }
+
+    /* ══ MILESTONES SIDEBAR ════════════════════════════════════════════════ */
+    .milestone-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .milestone-item {
+      display: flex;
+      gap: 14px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border2);
+      position: relative;
+    }
+
+    .milestone-item:last-child { border-bottom: none; }
+
+    .milestone-age {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+      background: var(--accent-bg);
+      border-radius: 4px;
+      padding: 2px 7px;
+      height: fit-content;
+      margin-top: 1px;
+      white-space: nowrap;
+    }
+
+    .milestone-text {
+      font-size: 13px;
+      color: var(--text);
+      flex: 1;
+      line-height: 1.5;
+    }
+
+    .milestone-done .milestone-text {
+      text-decoration: line-through;
+      color: var(--text3);
+    }
+
+    .milestone-check {
+      width: 16px;
+      height: 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 4px;
+      background: transparent;
+      cursor: pointer;
+      flex-shrink: 0;
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+
+    .milestone-check:hover { border-color: var(--accent); }
+    .milestone-check.checked { background: var(--accent); border-color: var(--accent); }
+
+    .milestone-check.checked::after {
+      content: '';
+      display: block;
+      width: 8px;
+      height: 5px;
+      border-left: 1.5px solid #fff;
+      border-bottom: 1.5px solid #fff;
+      transform: rotate(-45deg) translate(0px, -1px);
+    }
+
+    /* Bull market */
+    .bull-card {
+      padding: 14px 18px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .bull-icon {
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .bull-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text3);
+    }
+
+    .bull-status {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .bull-status.up { color: #4a8; }
+    .bull-status.down { color: #c64; }
+
+    /* Notes */
+    .notes-section {
+      margin-top: 24px;
+    }
+
+    /* ══ PAGE: CURVES ═══════════════════════════════════════════════════════ */
+    #page-curves {
+      display: none;
+      flex-direction: column;
+      height: calc(100vh - 56px);
+    }
+
+    #page-curves.active {
+      display: flex;
+    }
+
+    .curves-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 20px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+
+    .view-toggle {
+      display: flex;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .view-btn {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      font-weight: 500;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 6px 14px;
+      color: var(--text3);
+      transition: all 0.15s;
+    }
+
+    .view-btn.active {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .view-btn:not(.active):hover {
+      background: var(--surface2);
+      color: var(--text);
+    }
+
+    .curve-pills {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      flex: 1;
+      justify-content: center;
+    }
+
+    .curve-pill {
+      font-family: var(--font-ui);
+      font-size: 11.5px;
+      font-weight: 500;
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 12px;
+      cursor: pointer;
+      background: transparent;
+      color: var(--text3);
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .curve-pill-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .curve-pill.active {
+      color: var(--text);
+      background: var(--surface2);
+    }
+
+    .curves-body {
+      flex: 1;
+      position: relative;
+      background: var(--chart-bg);
+      overflow: hidden;
+    }
+
+    .chart-canvas-wrap {
+      position: absolute;
+      inset: 0;
+      padding: 16px 16px 16px 0;
+    }
+
+    #lifeChart {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    /* Strength Panel */
+    .strength-panel {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 172px;
+      background: rgba(8, 11, 18, 0.92);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      backdrop-filter: blur(8px);
       z-index: 10;
     }
 
-    .logo {
-      font-family: 'Playfair Display', serif;
-      font-size: 20px;
-      font-weight: 900;
-      letter-spacing: -0.5px;
-      white-space: nowrap;
-      flex-shrink: 0;
+    .sp-title {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.35);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
     }
-    .logo em { color: var(--cyan); font-style: normal; }
 
-    .header-pills {
+    .sp-row {
       display: flex;
-      gap: 8px;
-      flex: 1;
-      overflow-x: auto;
-      padding: 4px 0;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 12px;
     }
-    .header-pills::-webkit-scrollbar { display: none; }
 
-    .pill {
+    .sp-row:last-child { margin-bottom: 0; }
+
+    .sp-label {
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 6px;
-      padding: 3px 12px;
-      border-radius: 100px;
-      border: 1px solid var(--bd2);
-      background: var(--bg3);
-      white-space: nowrap;
-      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .sp-name {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.5);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .sp-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+    }
+
+    .sp-val {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .sp-slider {
+      width: 100%;
+      height: 3px;
+      appearance: none;
+      background: rgba(255,255,255,0.12);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .sp-slider::-webkit-slider-thumb {
+      appearance: none;
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.7);
+      cursor: pointer;
+      border: none;
+      transition: transform 0.15s;
+    }
+
+    .sp-slider::-webkit-slider-thumb:hover { transform: scale(1.3); }
+
+    /* Age slider in curves toolbar */
+    .curves-age-ctrl {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: auto;
+    }
+
+    .curves-age-lbl {
+      font-family: var(--font-mono);
       font-size: 11px;
+      color: var(--text3);
+      white-space: nowrap;
     }
-    .pill .lbl { color: var(--t2); }
-    .pill .val { color: var(--t0); font-weight: 500; }
-    .pill .val.hi { color: var(--cyan); }
-    .pill .val.ok { color: var(--green); }
-    .pill .val.warn { color: var(--gold); }
 
-    .hdr-btns { display: flex; gap: 6px; margin-left: auto; flex-shrink: 0; }
-
-    .btn {
-      display: inline-flex; align-items: center; gap: 5px;
-      padding: 5px 12px; border-radius: var(--r);
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 12px; font-weight: 600; letter-spacing: .5px;
-      cursor: pointer; border: 1px solid var(--bd2);
-      background: var(--bg3); color: var(--t1);
-      transition: all .18s;
+    /* ══ PAGE: LOG ══════════════════════════════════════════════════════════ */
+    .log-wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 40px 32px 80px;
     }
-    .btn:hover { border-color: var(--cyan); color: var(--cyan); }
-    .btn.primary { background: var(--cyan); color: var(--bg0); border-color: var(--cyan); }
-    .btn.primary:hover { background: #00b8d9; }
 
-    /* BODY */
-    .body {
-      display: grid;
-      grid-template-columns: var(--sidebar) 1fr var(--panel);
+    /* Journal */
+    .journal-add {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .journal-entries {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    .journal-entry {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      transition: border-color 0.2s;
+    }
+
+    .journal-entry:hover { border-color: var(--border); }
+
+    .journal-entry-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .journal-date {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text3);
+    }
+
+    .journal-age-badge {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--accent);
+      background: var(--accent-bg);
+      border-radius: 4px;
+      padding: 1px 6px;
+    }
+
+    .journal-text {
+      font-size: 13.5px;
+      color: var(--text);
+      line-height: 1.65;
+    }
+
+    .journal-del {
+      margin-left: auto;
+      font-size: 11px;
+      color: var(--text3);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: all 0.15s;
+    }
+
+    .journal-del:hover { background: #fee; color: #c44; }
+
+    /* Milestone Timeline */
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      position: relative;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 24px;
+      top: 16px;
+      bottom: 16px;
+      width: 1px;
+      background: var(--border);
+    }
+
+    .timeline-item {
+      display: flex;
+      gap: 16px;
+      padding: 12px 0;
+      position: relative;
+    }
+
+    .timeline-dot-wrap {
+      width: 48px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .timeline-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      background: var(--surface);
+      transition: all 0.2s;
+    }
+
+    .timeline-item.done .timeline-dot {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .timeline-age {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-top: -2px;
+    }
+
+    .timeline-content {
+      flex: 1;
+      padding-bottom: 8px;
+    }
+
+    .timeline-text {
+      font-size: 13.5px;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .timeline-item.done .timeline-text {
+      color: var(--text3);
+      text-decoration: line-through;
+    }
+
+    .timeline-note {
+      font-size: 12px;
+      color: var(--text3);
+      margin-top: 4px;
+      font-style: italic;
+    }
+
+    .timeline-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    /* Milestone add form */
+    .milestone-add-form {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    .milestone-add-form input[type="number"] {
+      width: 72px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 7px 10px;
+      outline: none;
+    }
+
+    .milestone-add-form input[type="text"] {
+      flex: 1;
+      min-width: 160px;
+    }
+
+    /* ══ PAGE: SETTINGS ═════════════════════════════════════════════════════ */
+    .settings-wrap {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 40px 32px 80px;
+    }
+
+    .accordion {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      margin-bottom: 12px;
+      box-shadow: var(--shadow);
       overflow: hidden;
-      height: calc(100vh - 54px);
     }
 
-    /* ── SIDEBAR ─────────────────────────────────────────── */
-    .sidebar {
-      background: var(--bg1);
-      border-right: 1px solid var(--bd);
+    .accordion-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s;
+    }
+
+    .accordion-head:hover { background: var(--surface2); }
+
+    .accordion-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .accordion-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      flex: 1;
+    }
+
+    .accordion-arrow {
+      font-size: 12px;
+      color: var(--text3);
+      transition: transform 0.2s;
+    }
+
+    .accordion.open .accordion-arrow { transform: rotate(180deg); }
+
+    .accordion-body {
+      display: none;
+      padding: 4px 20px 20px;
+      border-top: 1px solid var(--border2);
+    }
+
+    .accordion.open .accordion-body { display: block; }
+
+    .param-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px 24px;
+      margin-top: 4px;
+    }
+
+    .param-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .param-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .param-name {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text2);
+    }
+
+    .param-val {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--accent);
+    }
+
+    /* Snapshot */
+    .snapshot-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .snapshot-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 12px;
+      margin-bottom: 16px;
+      max-height: 220px;
       overflow-y: auto;
-      overflow-x: hidden;
-    }
-    .sidebar::-webkit-scrollbar { width: 3px; }
-    .sidebar::-webkit-scrollbar-thumb { background: var(--bd2); border-radius: 2px; }
-
-    .sec {
-      border-bottom: 1px solid var(--bd);
     }
 
-    .sec-hdr {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 12px 14px; cursor: pointer;
-      transition: background .15s; user-select: none;
-    }
-    .sec-hdr:hover { background: var(--bg2); }
-
-    .sec-title {
-      display: flex; align-items: center; gap: 8px;
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 11px; font-weight: 700;
-      letter-spacing: 1.2px; text-transform: uppercase;
-      color: var(--t1);
+    .snapshot-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
     }
 
-    .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-
-    .sec-controls {
-      display: flex; align-items: center; gap: 8px;
+    .snapshot-meta {
+      flex: 1;
     }
 
-    /* Toggle switch */
-    .tog {
-      width: 30px; height: 16px;
-      background: var(--bd2);
-      border-radius: 8px; position: relative;
-      cursor: pointer; border: none;
-      transition: background .2s; flex-shrink: 0;
-    }
-    .tog::after {
-      content: ''; position: absolute;
-      top: 2px; left: 2px;
-      width: 12px; height: 12px;
-      border-radius: 50%; background: var(--t2);
-      transition: all .2s;
-    }
-    .tog.on { background: color-mix(in srgb, currentColor 40%, transparent); }
-    .tog.on::after { transform: translateX(14px); background: white; }
-
-    .chev {
-      font-size: 9px; color: var(--t2);
-      transition: transform .2s;
-    }
-    .chev.open { transform: rotate(180deg); }
-
-    .sec-body {
-      display: none; padding: 0 14px 14px;
-    }
-    .sec-body.open { display: block; }
-
-    /* Form fields */
-    .fg { margin-bottom: 10px; }
-
-    .fl {
-      display: flex; align-items: center; justify-content: space-between;
-      font-size: 10px; color: var(--t2);
-      text-transform: uppercase; letter-spacing: .5px;
-      margin-bottom: 5px;
-    }
-    .fl .fv {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px; color: var(--t1);
-      text-transform: none; letter-spacing: 0;
+    .snapshot-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
     }
 
-    input[type="range"] {
-      -webkit-appearance: none; appearance: none;
-      width: 100%; height: 2px;
-      background: var(--bd2); border-radius: 1px;
-      outline: none; cursor: pointer;
-    }
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none; appearance: none;
-      width: 12px; height: 12px;
-      background: currentColor; border-radius: 50%;
-      cursor: pointer; transition: transform .15s;
-    }
-    input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.4); }
-
-    .hint {
-      font-size: 10px; color: var(--t2); line-height: 1.5;
-      padding: 6px 0;
+    .snapshot-date {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text3);
     }
 
-    /* ── MAIN ────────────────────────────────────────────── */
-    .main {
-      display: flex; flex-direction: column;
-      overflow: hidden; background: var(--bg0);
+    .export-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
     }
 
-    .chart-wrap {
-      flex: 1; position: relative; padding: 16px 16px 8px;
-      min-height: 0;
+    /* ══ TOAST ══════════════════════════════════════════════════════════════ */
+    .toast-container {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
     }
 
-    .chart-inner {
-      position: relative; width: 100%; height: 100%;
+    .toast {
+      font-family: var(--font-ui);
+      font-size: 13px;
+      font-weight: 500;
+      color: #fff;
+      background: var(--text);
+      border-radius: var(--radius);
+      padding: 10px 18px;
+      box-shadow: var(--shadow-lg);
+      animation: toast-in 0.25s ease;
+      pointer-events: all;
     }
 
-    /* Toggle bar at bottom of chart area */
-    .toggle-bar {
-      padding: 8px 16px 10px;
-      background: var(--bg1);
-      border-top: 1px solid var(--bd);
-      display: flex; gap: 6px; flex-wrap: wrap;
+    .toast.success { background: #2a6a42; }
+    .toast.error { background: #7a2a2a; }
+
+    @keyframes toast-in {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    .ctog {
-      display: flex; align-items: center; gap: 6px;
-      padding: 5px 12px; border-radius: 100px;
-      border: 1px solid var(--bd2); background: transparent;
-      cursor: pointer; transition: all .18s;
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 12px; font-weight: 600; letter-spacing: .5px;
-      color: var(--t2); white-space: nowrap;
-    }
-    .ctog .cdot {
-      width: 5px; height: 5px; border-radius: 50%;
-      background: currentColor; opacity: .4;
-    }
-    .ctog.on {
-      border-color: currentColor; color: inherit;
-      background: color-mix(in srgb, currentColor 8%, transparent);
-    }
-    .ctog.on .cdot { opacity: 1; }
-
-    /* ── PANEL (right) ───────────────────────────────────── */
-    .panel {
-      background: var(--bg1);
-      border-left: 1px solid var(--bd);
-      overflow-y: auto;
-      padding: 14px;
-      display: flex; flex-direction: column; gap: 14px;
-    }
-    .panel::-webkit-scrollbar { width: 3px; }
-    .panel::-webkit-scrollbar-thumb { background: var(--bd2); border-radius: 2px; }
-
-    .ptt {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 10px; font-weight: 700;
-      letter-spacing: 1.5px; text-transform: uppercase;
-      color: var(--t2); margin-bottom: 6px;
+    @keyframes toast-out {
+      from { opacity: 1; transform: translateY(0); }
+      to { opacity: 0; transform: translateY(8px); }
     }
 
-    /* Age widget */
-    .age-box {
-      background: var(--bg3); border: 1px solid var(--bd2);
-      border-radius: var(--r); padding: 12px;
-    }
-    .age-num {
-      font-family: 'Playfair Display', serif;
-      font-size: 44px; font-weight: 900;
-      color: var(--cyan); line-height: 1;
-    }
-    .age-num sup {
-      font-size: 14px; font-family: 'Barlow', sans-serif;
-      font-weight: 300; color: var(--t2); margin-left: 3px;
+    /* ══ UTILITIES ══════════════════════════════════════════════════════════ */
+    .gap-8 { gap: 8px; }
+    .gap-12 { gap: 12px; }
+    .flex { display: flex; }
+    .flex-col { flex-direction: column; }
+    .items-center { align-items: center; }
+    .justify-between { justify-content: space-between; }
+    .mt-4 { margin-top: 4px; }
+    .mt-8 { margin-top: 8px; }
+    .mt-12 { margin-top: 12px; }
+    .mt-16 { margin-top: 16px; }
+    .mt-24 { margin-top: 24px; }
+    .mb-12 { margin-bottom: 12px; }
+    .mb-16 { margin-bottom: 16px; }
+    .w-full { width: 100%; }
+    .text-sm { font-size: 12.5px; }
+    .text-xs { font-size: 11.5px; color: var(--text3); }
+    .text-mono { font-family: var(--font-mono); }
+    .text-accent { color: var(--accent); }
+    .divider { border: none; border-top: 1px solid var(--border2); margin: 16px 0; }
+
+    /* Empty state */
+    .empty {
+      text-align: center;
+      padding: 32px 20px;
+      color: var(--text3);
+      font-size: 13px;
+      font-style: italic;
     }
 
-    /* Stage select */
-    select {
-      width: 100%; background: var(--bg3);
-      border: 1px solid var(--bd2); border-radius: var(--r);
-      color: var(--t0); padding: 7px 10px;
-      font-family: 'Barlow', sans-serif; font-size: 12px;
-      outline: none; cursor: pointer;
-    }
-    select:focus { border-color: var(--cyan); }
-
-    /* Projection rows */
-    .proj-row {
-      background: var(--bg3); border: 1px solid var(--bd);
-      border-radius: 6px; padding: 8px 10px;
-    }
-    .proj-top {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 5px;
-    }
-    .proj-age { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--t2); }
-    .proj-val { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 500; color: var(--t0); }
-    .proj-bar { height: 2px; background: var(--bd2); border-radius: 1px; overflow: hidden; }
-    .proj-fill { height: 100%; background: var(--cyan); transition: width .5s ease; border-radius: 1px; }
-
-    /* Milestones */
-    .ms-list { display: flex; flex-direction: column; gap: 5px; }
-    .ms-item {
-      display: flex; align-items: flex-start; gap: 8px;
-      padding: 7px 8px;
-      background: var(--bg3); border: 1px solid var(--bd);
-      border-radius: 6px; font-size: 11px;
-    }
-    .ms-age {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px; color: var(--cyan); flex-shrink: 0; min-width: 24px;
-    }
-    .ms-txt {
-      color: var(--t1); line-height: 1.4; flex: 1;
-      min-width: 0; word-break: break-all;
-    }
-    .ms-del {
-      background: none; border: none; color: var(--t2);
-      cursor: pointer; font-size: 14px; flex-shrink: 0;
-      line-height: 1; padding: 0;
-    }
-    .ms-del:hover { color: var(--rose); }
-
-    textarea {
-      width: 100%; background: var(--bg3);
-      border: 1px solid var(--bd2); border-radius: var(--r);
-      color: var(--t1); font-family: 'Barlow', sans-serif;
-      font-size: 11px; line-height: 1.6; padding: 8px;
-      resize: vertical; outline: none; min-height: 80px;
-      transition: border-color .2s;
-    }
-    textarea:focus { border-color: var(--cyan); }
-
-    /* ── RESPONSIVE ──────────────────────────────────────── */
-    @media (max-width: 900px) {
-      body { overflow: auto; }
-      .app { height: auto; }
-      .body {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto auto auto;
-      }
-      .sidebar { border-right: none; border-bottom: 1px solid var(--bd); }
-      .panel { border-left: none; border-top: 1px solid var(--bd); }
-      .chart-wrap { min-height: 50vh; }
+    /* Stats grid in hero */
+    .stats-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
 
-    /* ── ANIMATIONS ──────────────────────────────────────── */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(6px); }
-      to   { opacity: 1; transform: translateY(0); }
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
     }
-    .header { animation: fadeUp .3s ease; }
-    .sidebar { animation: fadeUp .35s ease; }
-    .main    { animation: fadeUp .4s ease; }
-    .panel   { animation: fadeUp .45s ease; }
 
-    /* Permanent bull indicator */
-    .bull-badge {
-      display: inline-flex; align-items: center; gap: 5px;
-      padding: 2px 8px; border-radius: 4px;
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 11px; font-weight: 700;
+    .stat-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text3);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
     }
-    .bull-badge.yes { background: rgba(0,217,160,.15); color: var(--green); }
-    .bull-badge.no  { background: rgba(255,75,110,.15); color: var(--rose); }
+
+    .stat-val {
+      font-family: var(--font-mono);
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    /* Responsive tweaks */
+    @media (max-width: 768px) {
+      .hero { grid-template-columns: 1fr; gap: 24px; padding: 28px 24px; }
+      .two-col { grid-template-columns: 1fr; }
+      .param-grid { grid-template-columns: 1fr; }
+      .nav-brand { margin-right: 16px; }
+      .today-wrap, .log-wrap, .settings-wrap { padding: 24px 16px 60px; }
+    }
+
+    /* Scrollable log sections */
+    .log-col { overflow-y: auto; }
   </style>
 </head>
 <body>
-<div class="app">
 
-  <!-- ── HEADER ──────────────────────────────────────────── -->
-  <header class="header">
-    <div class="logo">人生<em>曲线</em></div>
+<!-- ══ NAV ══════════════════════════════════════════════════════════════════ -->
+<nav class="nav">
+  <a class="nav-brand" href="#">人生曲线 <span>·</span></a>
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-page="today" onclick="goPage('today')">今日</button>
+    <button class="nav-tab" data-page="curves" onclick="goPage('curves')">曲线</button>
+    <button class="nav-tab" data-page="log" onclick="goPage('log')">记录</button>
+    <button class="nav-tab" data-page="settings" onclick="goPage('settings')">设置</button>
+  </div>
+  <div class="nav-meta">
+    <span class="nav-age-badge" id="nav-age-badge">age 26</span>
+  </div>
+</nav>
 
-    <div class="header-pills">
-      <div class="pill">
-        <span class="lbl">年龄</span>
-        <span class="val hi" id="hdr-age">—</span>
+<!-- ══ TOAST CONTAINER ══════════════════════════════════════════════════════ -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- ══ PAGE: TODAY ═══════════════════════════════════════════════════════════ -->
+<div class="page active" id="page-today">
+  <div class="today-wrap">
+
+    <!-- Hero -->
+    <div class="hero">
+      <!-- Left: big age -->
+      <div>
+        <div class="hero-age" id="hero-age">26</div>
+        <div class="hero-age-label">岁</div>
       </div>
-      <div class="pill">
-        <span class="lbl">阶段</span>
-        <span class="val" id="hdr-stage">—</span>
+
+      <!-- Middle: info + stats -->
+      <div class="hero-info">
+        <div class="hero-date" id="hero-date">—</div>
+        <div class="hero-stage-badge">
+          <span class="hero-stage-dot"></span>
+          <span id="hero-stage-text">探索期</span>
+        </div>
+        <div class="stats-grid" style="margin-top:12px;">
+          <div class="stat-item">
+            <div class="stat-label">综合活力指数</div>
+            <div class="stat-val" id="stat-composite">—</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">牛市状态</div>
+            <div class="stat-val" id="stat-bull">—</div>
+          </div>
+        </div>
       </div>
-      <div class="pill">
-        <span class="lbl">低点保障</span>
-        <span class="val" id="hdr-floor">—</span>
-      </div>
-      <div class="pill">
-        <span class="lbl">复合指数</span>
-        <span class="val hi" id="hdr-composite">—</span>
-      </div>
-      <div class="pill">
-        <span class="lbl">资本曲线</span>
-        <span class="val" id="hdr-capital">—</span>
+
+      <!-- Right: controls -->
+      <div class="hero-controls">
+        <div class="ctrl-group">
+          <div class="ctrl-label">当前年龄</div>
+          <input type="range" id="age-slider-today" min="15" max="85" step="0.5">
+          <div style="font-family:var(--font-mono);font-size:11px;color:var(--text3);text-align:right;" id="age-slider-today-val">26</div>
+        </div>
+        <div class="ctrl-group">
+          <div class="ctrl-label">人生阶段</div>
+          <select id="stage-select">
+            <option value="explore">🌱 探索期 (Explore)</option>
+            <option value="build">🏗 建立期 (Build)</option>
+            <option value="accelerate">🚀 加速期 (Accelerate)</option>
+            <option value="harvest">🌾 收获期 (Harvest)</option>
+            <option value="legacy">🏛 传承期 (Legacy)</option>
+          </select>
+        </div>
       </div>
     </div>
 
-    <div class="hdr-btns">
-      <button class="btn" onclick="importData()">导入</button>
-      <button class="btn" onclick="exportData()">导出</button>
-      <button class="btn" onclick="saveSnapshot()">保存快照</button>
-      <button class="btn" onclick="showSnapshots()">历史快照</button>
-      <button class="btn" onclick="resetAll()">重置</button>
+    <!-- Two col: curve cards + milestones -->
+    <div class="two-col">
+
+      <!-- Left: 6 curve status cards -->
+      <div class="card">
+        <div class="section-subtitle">当前曲线状态</div>
+        <div class="curve-cards" id="curve-cards">
+          <!-- rendered by JS -->
+        </div>
+      </div>
+
+      <!-- Right: milestones + bull market -->
+      <div>
+        <!-- Bull market -->
+        <div class="bull-card">
+          <div class="bull-icon" id="bull-icon">📈</div>
+          <div>
+            <div class="bull-label">趋势分析</div>
+            <div class="bull-status" id="bull-status-text">计算中…</div>
+          </div>
+        </div>
+
+        <!-- Milestones card -->
+        <div class="card">
+          <div class="section-subtitle">即将到来的里程碑</div>
+          <div class="milestone-list" id="upcoming-milestones">
+            <!-- rendered by JS -->
+          </div>
+        </div>
+      </div>
+
     </div>
-  </header>
 
-  <!-- ── BODY ────────────────────────────────────────────── -->
-  <div class="body">
-
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-
-      <!-- Global -->
-      <div class="sec">
-        <div class="sec-hdr" onclick="toggleSec('global')">
-          <div class="sec-title">⚙ 全局设置</div>
-          <span class="chev open" id="chev-global">▼</span>
-        </div>
-        <div class="sec-body open" id="sb-global">
-          <div class="fg">
-            <div class="fl"><span>目标寿命</span><span class="fv" id="fv-maxAge">80</span></div>
-            <input type="range" min="60" max="100" value="80" id="sl-maxAge" style="color:var(--cyan)">
-          </div>
-        </div>
+    <!-- Today notes -->
+    <div class="card notes-section">
+      <div class="section-subtitle" style="margin-bottom:10px;">今日笔记</div>
+      <textarea id="today-note" placeholder="记录今天的想法、进展、感悟…" style="min-height:110px;"></textarea>
+      <div style="display:flex;justify-content:flex-end;margin-top:10px;">
+        <button class="btn btn-primary btn-sm" onclick="saveNote()">保存笔记</button>
       </div>
-
-      <!-- Employment -->
-      <div class="sec">
-        <div class="sec-hdr" onclick="toggleSec('employ')">
-          <div class="sec-title">
-            <span class="dot" style="background:var(--c-employ)"></span>传统就业
-          </div>
-          <div class="sec-controls">
-            <button class="tog on" style="color:var(--c-employ)" id="tog-employ" onclick="event.stopPropagation();toggleCurve('employ')"></button>
-            <span class="chev" id="chev-employ">▼</span>
-          </div>
-        </div>
-        <div class="sec-body" id="sb-employ">
-          <div class="fg">
-            <div class="fl"><span>开始工作年龄</span><span class="fv" id="fv-e-start">22</span></div>
-            <input type="range" min="18" max="30" value="22" id="sl-e-start" style="color:var(--c-employ)">
-          </div>
-          <div class="fg">
-            <div class="fl"><span>职业巅峰年龄</span><span class="fv" id="fv-e-peak">38</span></div>
-            <input type="range" min="28" max="55" value="38" id="sl-e-peak" style="color:var(--c-employ)">
-          </div>
-          <div class="fg">
-            <div class="fl"><span>退休年龄</span><span class="fv" id="fv-e-retire">60</span></div>
-            <input type="range" min="45" max="75" value="60" id="sl-e-retire" style="color:var(--c-employ)">
-          </div>
-          <div class="fg">
-            <div class="fl"><span>峰值收入指数</span><span class="fv" id="fv-e-val">70</span></div>
-            <input type="range" min="20" max="180" value="70" id="sl-e-val" style="color:var(--c-employ)">
-          </div>
-        </div>
-      </div>
-
-      <!-- Pulse -->
-      <div class="sec">
-        <div class="sec-hdr" onclick="toggleSec('pulse')">
-          <div class="sec-title">
-            <span class="dot" style="background:var(--c-pulse)"></span>创业脉冲
-          </div>
-          <div class="sec-controls">
-            <button class="tog on" style="color:var(--c-pulse)" id="tog-pulse" onclick="event.stopPropagation();toggleCurve('pulse')"></button>
-            <span class="chev" id="chev-pulse">▼</span>
-          </div>
-        </div>
-        <div class="sec-body" id="sb-pulse">
-          <div class="fg">
-            <div class="fl"><span>开始尝试年龄</span><span class="fv" id="fv-p-start">20</span></div>
-            <input type="range" min="16" max="35" value="20" id="sl-p-start" style="color:var(--c-pulse)">
-          </div>
-          <div class="fg">
-            <div class="fl"><span>尝试总次数</span><span class="fv" id="fv-p-cnt">15</span></div>
-            <input type="range" min="5" max="35" value="15" id="sl-p-cnt" style="color:var(--c-pulse)">
-          </div>
-          <div class="fg">
-            <div class="fl"><span>成功率 %</span><span class="fv" id="fv-p-rate">30</span></div>
-            <input type="range" min="5" max="80" value="30" id="sl-p-rate" style="color:var(--c-pulse)">
-          </div>
-          <div class="fg">
-            <div class="fl"><span>峰值幅度</span><span class="fv" id="fv-p-amp">110</span></div>
-            <input type="range" min="30" max="220" value="110" id="sl-p-amp" style="color:var(--c-pulse)">
-          </div>
-        </div>
-      </div>
-
-      <!-- Serial -->
-      <div class="sec">
-        <div class="sec-hdr" onclick="toggleSec('serial')">
-          <div class="sec-title">
-            <span class="dot" style="background:var(--c-serial)"></span>连续创业
-          </div>
-          <div class="sec-controls">
-            <button class="tog on" style="color:var(--c-serial)" id="tog-serial" onclick="event.stopPropagation();toggleCurve('serial')"></button>
-            <span class="chev" id="chev-serial">▼</span>
-          </div>
-        </div>
-        <div class="sec-body" id="sb-serial">
-          <div class="fg">
-            <div class="fl"><span>启动年龄</span><span class="fv" id="fv-s-start">20</span></div>
-            <input type="range" min="16" max="35" value="20" id="sl-s-start" style="color:var(--c-serial)">
-          </div>
-          <div class="fg">
-            <div class="fl"><span>周期数量</span><span class="fv" id="fv-s-cyc">4</span></div>
-            <input type="range" min="2" max="8" value="4" id="sl-s-cyc" style="color:var(--c-serial)">
-          </div>
-          <div class="fg">
-            <div class="fl"><span>周期长度 (年)</span><span class="fv" id="fv-s-len">7</span></div>
-            <input type="range" min="3" max="15" value="7" id="sl-s-len" style="color:var(--c-serial)">
-          </div>
-          <div class="fg">
-            <div class="fl"><span>最终峰值指数</span><span class="fv" id="fv-s-peak">160</span></div>
-            <input type="range" min="60" max="350" value="160" id="sl-s-peak" style="color:var(--c-serial)">
-          </div>
-          <div class="fg">
-            <div class="fl"><span>阶梯幅度 %</span><span class="fv" id="fv-s-step">35</span></div>
-            <input type="range" min="10" max="60" value="35" id="sl-s-step" style="color:var(--c-serial)">
-          </div>
-        </div>
-      </div>
-
-      <!-- AI -->
-      <div class="sec">
-        <div class="sec-hdr" onclick="toggleSec('ai')">
-          <div class="sec-title">
-            <span class="dot" style="background:var(--c-ai)"></span>AI 协作
-          </div>
-          <div class="sec-controls">
-            <button class="tog on" style="color:var(--c-ai)" id="tog-ai" onclick="event.stopPropagation();toggleCurve('ai')"></button>
-            <span class="chev" id="chev-ai">▼</span>
-          </div>
-        </div>
-        <div class="sec-body" id="sb-ai">
-          <div class="fg">
-            <div class="fl"><span>采用 AI 年龄</span><span class="fv" id="fv-a-start">24</span></div>
-            <input type="range" min="15" max="50" value="24" id="sl-a-start" style="color:var(--c-ai)">
-          </div>
-          <div class="fg">
-            <div class="fl"><span>初始跃迁量</span><span class="fv" id="fv-a-jump">70</span></div>
-            <input type="range" min="10" max="180" value="70" id="sl-a-jump" style="color:var(--c-ai)">
-          </div>
-          <div class="fg">
-            <div class="fl"><span>协作深度 (年增长)</span><span class="fv" id="fv-a-grow">4</span></div>
-            <input type="range" min="1" max="20" value="4" id="sl-a-grow" style="color:var(--c-ai)">
-          </div>
-          <div class="fg">
-            <div class="fl"><span>当前技能水平 %</span><span class="fv" id="fv-a-skill">60</span></div>
-            <input type="range" min="10" max="100" value="60" id="sl-a-skill" style="color:var(--c-ai)">
-          </div>
-        </div>
-      </div>
-
-      <!-- Capital -->
-      <div class="sec">
-        <div class="sec-hdr" onclick="toggleSec('capital')">
-          <div class="sec-title">
-            <span class="dot" style="background:var(--c-capital)"></span>资本复利
-          </div>
-          <div class="sec-controls">
-            <button class="tog on" style="color:var(--c-capital)" id="tog-capital" onclick="event.stopPropagation();toggleCurve('capital')"></button>
-            <span class="chev" id="chev-capital">▼</span>
-          </div>
-        </div>
-        <div class="sec-body" id="sb-capital">
-          <div class="fg">
-            <div class="fl"><span>开始投资年龄</span><span class="fv" id="fv-k-start">28</span></div>
-            <input type="range" min="18" max="55" value="28" id="sl-k-start" style="color:var(--c-capital)">
-          </div>
-          <div class="fg">
-            <div class="fl"><span>初始资本指数</span><span class="fv" id="fv-k-init">15</span></div>
-            <input type="range" min="1" max="120" value="15" id="sl-k-init" style="color:var(--c-capital)">
-          </div>
-          <div class="fg">
-            <div class="fl"><span>年化收益率 %</span><span class="fv" id="fv-k-rate">8</span></div>
-            <input type="range" min="3" max="30" value="8" id="sl-k-rate" style="color:var(--c-capital)">
-          </div>
-          <div class="fg">
-            <div class="fl"><span>年度追加投入</span><span class="fv" id="fv-k-add">8</span></div>
-            <input type="range" min="0" max="80" value="8" id="sl-k-add" style="color:var(--c-capital)">
-          </div>
-        </div>
-      </div>
-
-      <!-- Composite -->
-      <div class="sec">
-        <div class="sec-hdr" onclick="toggleSec('composite')">
-          <div class="sec-title">
-            <span class="dot" style="background:var(--c-composite)"></span>复合叠加
-          </div>
-          <div class="sec-controls">
-            <button class="tog on" style="color:var(--c-composite)" id="tog-composite" onclick="event.stopPropagation();toggleCurve('composite')"></button>
-            <span class="chev" id="chev-composite">▼</span>
-          </div>
-        </div>
-        <div class="sec-body" id="sb-composite">
-          <p class="hint">
-            复合叠加是所有激活曲线的加权合成，代表理想人生轨迹的整体走向。<br><br>
-            <strong style="color:var(--t1)">永久牛市目标</strong>：每个低点都高于前一个低点。<br><br>
-            通过调整其他曲线参数，观察复合曲线形态的变化。
-          </p>
-          <div class="fg">
-            <div class="fl"><span>平滑系数</span><span class="fv" id="fv-comp-smooth">3.0</span></div>
-            <input type="range" min="10" max="60" value="30" id="sl-comp-smooth" step="1" style="color:var(--c-composite)">
-          </div>
-        </div>
-      </div>
-
-    </aside>
-
-    <!-- MAIN CHART -->
-    <main class="main">
-      <div class="chart-wrap">
-        <div class="chart-inner">
-          <canvas id="chart"></canvas>
-        </div>
-      </div>
-
-      <div class="toggle-bar">
-        <button class="ctog on" style="color:var(--c-employ)"    data-key="employ"    onclick="toggleCurve('employ')">   <span class="cdot"></span>传统就业</button>
-        <button class="ctog on" style="color:var(--c-pulse)"     data-key="pulse"     onclick="toggleCurve('pulse')">    <span class="cdot"></span>创业脉冲</button>
-        <button class="ctog on" style="color:var(--c-serial)"    data-key="serial"    onclick="toggleCurve('serial')">   <span class="cdot"></span>连续创业</button>
-        <button class="ctog on" style="color:var(--c-ai)"        data-key="ai"        onclick="toggleCurve('ai')">       <span class="cdot"></span>AI 协作</button>
-        <button class="ctog on" style="color:var(--c-capital)"   data-key="capital"   onclick="toggleCurve('capital')">  <span class="cdot"></span>资本复利</button>
-        <button class="ctog on" style="color:var(--c-composite)" data-key="composite" onclick="toggleCurve('composite')"><span class="cdot"></span>复合叠加</button>
-      </div>
-    </main>
-
-    <!-- RIGHT PANEL -->
-    <aside class="panel">
-
-      <!-- Age -->
-      <div>
-        <div class="ptt">当前年龄</div>
-        <div class="age-box">
-          <div class="age-num" id="age-num">26<sup>岁</sup></div>
-          <input type="range" min="15" max="80" value="26" id="age-sl" style="color:var(--cyan);margin-top:8px">
-        </div>
-      </div>
-
-      <!-- Stage -->
-      <div>
-        <div class="ptt">当前阶段</div>
-        <select id="stage-sel">
-          <option value="edu">📚 学习积累期</option>
-          <option value="explore" selected>🔍 探索尝试期</option>
-          <option value="growth">📈 快速成长期</option>
-          <option value="peak">🚀 巅峰突破期</option>
-          <option value="compound">💰 复利收获期</option>
-          <option value="stable">🏔 稳定传承期</option>
-        </select>
-      </div>
-
-      <!-- Projections -->
-      <div>
-        <div class="ptt">关键节点预测</div>
-        <div id="proj-list" style="display:flex;flex-direction:column;gap:5px"></div>
-      </div>
-
-      <!-- Milestones -->
-      <div>
-        <div class="ptt">人生里程碑</div>
-        <div class="ms-list" id="ms-list"></div>
-        <button class="btn" style="width:100%;margin-top:6px;justify-content:center" onclick="addMilestone()">+ 添加里程碑</button>
-      </div>
-
-      <!-- Notes -->
-      <div style="flex:1">
-        <div class="ptt">当前阶段备注</div>
-        <textarea id="notes" placeholder="记录你正在进行的事业、当前的目标、或任何想对未来自己说的话..."></textarea>
-      </div>
-
-    </aside>
+    </div>
 
   </div>
 </div>
 
-<!-- SNAPSHOT MODAL -->
-<div id="snap-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center">
-  <div style="background:var(--bg2);border:1px solid var(--bd2);border-radius:12px;padding:24px;max-width:500px;width:90%;max-height:80vh;overflow-y:auto">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-      <strong style="font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:1px;text-transform:uppercase">历史快照</strong>
-      <button class="btn" onclick="document.getElementById('snap-modal').style.display='none'">关闭</button>
+<!-- ══ PAGE: CURVES ═══════════════════════════════════════════════════════════ -->
+<div class="page" id="page-curves">
+
+  <!-- Toolbar -->
+  <div class="curves-toolbar">
+    <div class="view-toggle">
+      <button class="view-btn active" id="view-focus" onclick="setView('focus')">青壮年 15–50</button>
+      <button class="view-btn" id="view-full" onclick="setView('full')">全生命 15–80</button>
     </div>
-    <div id="snap-list" style="display:flex;flex-direction:column;gap:8px"></div>
-    <p id="snap-empty" style="color:var(--t2);font-size:12px;text-align:center;padding:20px 0">暂无快照</p>
+
+    <div class="curve-pills" id="curve-pills">
+      <!-- rendered by JS -->
+    </div>
+
+    <div class="curves-age-ctrl">
+      <span class="curves-age-lbl">年龄</span>
+      <input type="range" id="age-slider-curves" min="15" max="85" step="0.5" style="width:100px;">
+      <span class="curves-age-lbl" id="age-slider-curves-val" style="min-width:28px;">26</span>
+    </div>
+  </div>
+
+  <!-- Chart area -->
+  <div class="curves-body">
+    <div class="chart-canvas-wrap">
+      <canvas id="lifeChart"></canvas>
+    </div>
+
+    <!-- Strength panel -->
+    <div class="strength-panel">
+      <div class="sp-title">强度控制</div>
+      <div class="sp-row" id="sp-employ">
+        <div class="sp-label">
+          <span class="sp-name"><span class="sp-dot" style="background:var(--c-employ)"></span>职业</span>
+          <span class="sp-val" id="sp-employ-val">70</span>
+        </div>
+        <input type="range" class="sp-slider" min="0" max="100" value="70"
+               oninput="spUpdate('employ','str',+this.value,'sp-employ-val')">
+      </div>
+      <div class="sp-row" id="sp-pulse">
+        <div class="sp-label">
+          <span class="sp-name"><span class="sp-dot" style="background:var(--c-pulse)"></span>脉冲</span>
+          <span class="sp-val" id="sp-pulse-val">75</span>
+        </div>
+        <input type="range" class="sp-slider" min="0" max="100" value="75"
+               oninput="spUpdate('pulse','str',+this.value,'sp-pulse-val')">
+      </div>
+      <div class="sp-row" id="sp-serial">
+        <div class="sp-label">
+          <span class="sp-name"><span class="sp-dot" style="background:var(--c-serial)"></span>连续</span>
+          <span class="sp-val" id="sp-serial-val">85</span>
+        </div>
+        <input type="range" class="sp-slider" min="0" max="100" value="85"
+               oninput="spUpdate('serial','str',+this.value,'sp-serial-val')">
+      </div>
+      <div class="sp-row" id="sp-ai">
+        <div class="sp-label">
+          <span class="sp-name"><span class="sp-dot" style="background:var(--c-ai)"></span>AI</span>
+          <span class="sp-val" id="sp-ai-val">65</span>
+        </div>
+        <input type="range" class="sp-slider" min="0" max="100" value="65"
+               oninput="spUpdate('ai','depth',+this.value,'sp-ai-val')">
+      </div>
+      <div class="sp-row" id="sp-capital">
+        <div class="sp-label">
+          <span class="sp-name"><span class="sp-dot" style="background:var(--c-capital)"></span>资本</span>
+          <span class="sp-val" id="sp-capital-val">8</span>
+        </div>
+        <input type="range" class="sp-slider" min="2" max="25" value="8"
+               oninput="spUpdate('capital','rate',+this.value,'sp-capital-val')">
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ PAGE: LOG ══════════════════════════════════════════════════════════════ -->
+<div class="page" id="page-log">
+  <div class="log-wrap">
+    <div class="two-col" style="align-items:start;">
+
+      <!-- Left: Journal -->
+      <div>
+        <div class="section-title" style="margin-bottom:16px;">日志记录</div>
+
+        <!-- Add entry -->
+        <div class="journal-add">
+          <div class="section-subtitle">新增记录</div>
+          <textarea id="journal-input" placeholder="记录今天的思考、突破、感悟…" style="min-height:90px;"></textarea>
+          <div style="display:flex;justify-content:flex-end;margin-top:10px;">
+            <button class="btn btn-primary btn-sm" onclick="addJournal()">添加记录</button>
+          </div>
+        </div>
+
+        <!-- Entries list -->
+        <div class="journal-entries" id="journal-list">
+          <!-- rendered by JS -->
+        </div>
+      </div>
+
+      <!-- Right: Milestones Timeline -->
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+          <div class="section-title" style="margin-bottom:0;">里程碑时间线</div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="card" style="padding:20px;">
+          <div class="timeline" id="milestone-timeline">
+            <!-- rendered by JS -->
+          </div>
+
+          <!-- Add milestone -->
+          <hr class="divider">
+          <div class="section-subtitle">添加里程碑</div>
+          <div class="milestone-add-form">
+            <input type="number" id="ms-age-input" placeholder="年龄" min="15" max="85">
+            <input type="text" id="ms-text-input" placeholder="里程碑内容">
+            <button class="btn btn-primary btn-sm" onclick="addMilestone()">添加</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
   </div>
 </div>
 
+<!-- ══ PAGE: SETTINGS ════════════════════════════════════════════════════════ -->
+<div class="page" id="page-settings">
+  <div class="settings-wrap">
+    <div class="section-title" style="margin-bottom:24px;">参数设置</div>
+
+    <!-- Curve accordions -->
+    <div id="settings-accordions">
+      <!-- rendered by JS -->
+    </div>
+
+    <!-- Snapshot management -->
+    <div class="snapshot-section" style="margin-top:32px;">
+      <div class="section-subtitle">快照管理</div>
+
+      <div class="snapshot-list" id="snapshot-list">
+        <!-- rendered by JS -->
+      </div>
+
+      <div style="display:flex;gap:8px;margin-bottom:16px;">
+        <input type="text" id="snapshot-name-input" placeholder="快照名称…" style="flex:1;">
+        <button class="btn btn-primary btn-sm" onclick="saveSnapshot()">保存快照</button>
+      </div>
+
+      <hr class="divider">
+      <div class="section-subtitle">导入 / 导出</div>
+      <div class="export-row">
+        <button class="btn btn-secondary btn-sm" onclick="exportJSON()">导出 JSON</button>
+        <button class="btn btn-secondary btn-sm" onclick="importJSON()">导入 JSON</button>
+        <button class="btn btn-ghost btn-sm" onclick="resetAll()" style="color:#c64;">重置默认</button>
+      </div>
+      <input type="file" id="import-file" accept=".json" style="display:none;" onchange="handleImport(event)">
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ SCRIPT ════════════════════════════════════════════════════════════════ -->
 <script>
-// ════════════════════════════════════════════════
-// CONSTANTS
-// ════════════════════════════════════════════════
-const MIN_AGE = 15;
-const AGES = Array.from({length: 71}, (_, i) => MIN_AGE + i); // 15–85
+'use strict';
 
-const COLORS = {
-  employ:    '#5b8fbf',
-  pulse:     '#ff6b35',
-  serial:    '#00d9ff',
-  ai:        '#a855f7',
-  capital:   '#f5a623',
-  composite: '#f0f6ff'
-};
+/* ══ CONSTANTS ══════════════════════════════════════════════════════════════ */
+const MIN_AGE = 15;
+const AGES = Array.from({length: 71}, (_, i) => i + MIN_AGE); // 15..85
+const PHI = 1.618;
+const LS_KEY = 'life_picture_v2';
+
+const CURVE_DEFS = [
+  { key: 'employ',    label: '职业曲线',  labelEn: 'Employment', color: '#4a8fa8' },
+  { key: 'pulse',     label: '脉冲曲线',  labelEn: 'Pulse',       color: '#c9614a' },
+  { key: 'serial',    label: '连续创业',  labelEn: 'Serial',      color: '#5a8f6a' },
+  { key: 'ai',        label: 'AI杠杆',    labelEn: 'AI Leverage', color: '#8b62c4' },
+  { key: 'capital',   label: '资本曲线',  labelEn: 'Capital',     color: '#b08040' },
+  { key: 'composite', label: '综合指数',  labelEn: 'Composite',   color: '#c8bfb0' },
+];
 
 const STAGES = {
-  edu:      '学习积累期',
-  explore:  '探索尝试期',
-  growth:   '快速成长期',
-  peak:     '巅峰突破期',
-  compound: '复利收获期',
-  stable:   '稳定传承期'
+  explore:    { label: '探索期', desc: 'Exploration' },
+  build:      { label: '建立期', desc: 'Building' },
+  accelerate: { label: '加速期', desc: 'Acceleration' },
+  harvest:    { label: '收获期', desc: 'Harvest' },
+  legacy:     { label: '传承期', desc: 'Legacy' },
 };
 
-// ════════════════════════════════════════════════
-// DEFAULT STATE
-// ════════════════════════════════════════════════
-const DEFAULTS = {
-  currentAge: 26,
-  maxAge: 80,
-  stage: 'explore',
-  notes: '',
-  milestones: [
-    { age: 22, text: '大学毕业，开始工作' },
-    { age: 25, text: '第一次创业尝试' },
-    { age: 30, text: '目标：建立稳定被动收入' },
-    { age: 35, text: '第二个创业周期突破' }
+const PARAM_META = {
+  employ: [
+    { key: 'startAge', label: '起始年龄', min: 15, max: 30, step: 1 },
+    { key: 'peakAge',  label: '巅峰年龄', min: 25, max: 55, step: 1 },
+    { key: 'retireAge',label: '退休年龄', min: 45, max: 75, step: 1 },
+    { key: 'str',      label: '强度',     min: 0,  max: 100, step: 1 },
   ],
-  enabled: {
-    employ: true, pulse: true, serial: true,
-    ai: true, capital: true, composite: true
-  },
-  params: {
-    maxAge:      80,
-    employ:      { start: 22, peak: 38, retire: 60, val: 70 },
-    pulse:       { start: 20, cnt: 15, rate: 30, amp: 110 },
-    serial:      { start: 20, cyc: 4, len: 7, peak: 160, step: 35 },
-    ai:          { start: 24, jump: 70, grow: 4, skill: 60 },
-    capital:     { start: 28, init: 15, rate: 8, add: 8 },
-    compSmooth:  3.0
-  }
+  pulse: [
+    { key: 'startAge', label: '起始年龄', min: 15, max: 35, step: 1 },
+    { key: 'cnt',      label: '脉冲次数', min: 3,  max: 20,  step: 1 },
+    { key: 'rate',     label: '成功率',   min: 0,  max: 100, step: 1 },
+    { key: 'str',      label: '强度',     min: 0,  max: 100, step: 1 },
+  ],
+  serial: [
+    { key: 'startAge', label: '起始年龄', min: 15, max: 35, step: 1 },
+    { key: 'cyc',      label: '周期数',   min: 1,  max: 8,   step: 1 },
+    { key: 'len',      label: '周期长度', min: 3,  max: 15,  step: 1 },
+    { key: 'str',      label: '强度',     min: 0,  max: 100, step: 1 },
+  ],
+  ai: [
+    { key: 'startAge', label: '起始年龄', min: 15, max: 40, step: 1 },
+    { key: 'jump',     label: '初始跃迁', min: 0,  max: 100, step: 1 },
+    { key: 'depth',    label: '深度',     min: 0,  max: 100, step: 1 },
+    { key: 'grow',     label: '增长率',   min: 1,  max: 15,  step: 1 },
+  ],
+  capital: [
+    { key: 'startAge', label: '起始年龄', min: 15, max: 45, step: 1 },
+    { key: 'init',     label: '初始资本', min: 0,  max: 100, step: 1 },
+    { key: 'rate',     label: '年化收益', min: 2,  max: 25,  step: 1 },
+    { key: 'add',      label: '年度追加', min: 0,  max: 50,  step: 1 },
+  ],
 };
 
-let S = deepClone(DEFAULTS);
+/* ══ DEFAULTS ═══════════════════════════════════════════════════════════════ */
+const DEFAULTS = () => ({
+  currentAge: 26,
+  stage: 'explore',
+  enabled: { employ: true, pulse: true, serial: true, ai: true, capital: true, composite: true },
+  params: {
+    employ:  { startAge: 22, peakAge: 40, retireAge: 60, str: 70 },
+    pulse:   { startAge: 20, cnt: 12, rate: 30, str: 75 },
+    serial:  { startAge: 20, cyc: 4, len: 7, str: 85 },
+    ai:      { startAge: 24, jump: 60, depth: 65, grow: 5 },
+    capital: { startAge: 28, init: 20, rate: 8, add: 10 },
+  },
+  milestones: [
+    { age: 22, text: '大学毕业，开始工作', done: false, note: '' },
+    { age: 25, text: '第一次创业尝试', done: false, note: '' },
+    { age: 30, text: '建立第一个稳定被动收入', done: false, note: '' },
+    { age: 35, text: '完成第二个创业周期突破', done: false, note: '' },
+  ],
+  journal: [],
+  todayNote: '',
+  snapshots: [],
+});
 
-// ════════════════════════════════════════════════
-// MATH ENGINE
-// ════════════════════════════════════════════════
-function ss(t) { return t * t * (3 - 2 * t); } // smoothstep
+/* ══ STATE ══════════════════════════════════════════════════════════════════ */
+let S = DEFAULTS();
+let chart = null;
+let currentPage = 'today';
+let chartView = 'focus'; // 'focus' | 'full'
+
+/* ══ PERSIST ════════════════════════════════════════════════════════════════ */
+function persist() {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch(e) {}
+}
+
+function loadSaved() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return;
+    const saved = JSON.parse(raw);
+    // Deep merge
+    S = deepMerge(DEFAULTS(), saved);
+  } catch(e) {}
+}
+
+function deepMerge(target, source) {
+  const out = { ...target };
+  for (const k of Object.keys(source)) {
+    if (source[k] !== null && typeof source[k] === 'object' && !Array.isArray(source[k])) {
+      out[k] = deepMerge(target[k] || {}, source[k]);
+    } else {
+      out[k] = source[k];
+    }
+  }
+  return out;
+}
+
+/* ══ CURVE MATH ═════════════════════════════════════════════════════════════ */
+function smoothstep(t) {
+  t = Math.max(0, Math.min(1, t));
+  return t * t * (3 - 2 * t);
+}
 
 function calcEmploy(p, ages) {
+  const s = p.str / 100;
   return ages.map(age => {
-    if (age < p.start) return 0;
-    if (age <= p.peak) {
-      const t = (age - p.start) / (p.peak - p.start);
-      return p.val * ss(t) * 0.88;
+    if (age < p.startAge) return 0;
+    if (age <= p.peakAge) {
+      const t = (age - p.startAge) / (p.peakAge - p.startAge || 1);
+      return 72 * s * smoothstep(t);
     }
-    if (age <= p.retire) {
-      const t = (age - p.peak) / (p.retire - p.peak);
-      return p.val * 0.88 * (1 - 0.35 * Math.pow(t, 1.5));
+    if (age <= p.retireAge) {
+      const t = (age - p.peakAge) / (p.retireAge - p.peakAge || 1);
+      return 72 * s * (1 - 0.32 * Math.pow(t, 1.3));
     }
-    return p.val * 0.11 * Math.exp(-0.22 * (age - p.retire));
+    return 72 * s * 0.15 * Math.exp(-0.18 * (age - p.retireAge));
   });
 }
 
 function calcPulse(p, ages) {
-  // Deterministic pulses based on params (seed = start age)
   const pulses = [];
-  const span = 75 - p.start;
+  const span = Math.min(32, 75 - p.startAge);
   const avgGap = span / p.cnt;
-  let t = p.start;
+  let t = p.startAge;
   for (let i = 0; i < p.cnt; i++) {
-    const variation = 0.3 + 0.7 * Math.abs(Math.sin(i * 1.618 + p.start * 0.1));
-    t += avgGap * variation * 0.7;
-    if (t > 82) break;
+    const j = 0.25 + 0.75 * Math.abs(Math.sin(i * PHI + p.startAge * 0.2));
+    t += avgGap * j * 0.68;
+    if (t > 78) break;
     const ok = Math.abs(Math.sin(i * 2.39 + 1.1)) < (p.rate / 100);
     const amp = ok
-      ? p.amp * (0.5 + 0.5 * Math.abs(Math.sin(i * 0.73)))
-      : p.amp * 0.18 * (0.4 + 0.6 * Math.abs(Math.sin(i * 1.27)));
-    const w = ok ? 0.85 + Math.abs(Math.sin(i)) * 0.5 : 0.28 + Math.abs(Math.sin(i * 1.1)) * 0.15;
-    pulses.push({ c: t, a: amp, w });
+      ? (48 + 32 * Math.abs(Math.sin(i * 0.73))) * (p.str / 100)
+      : (7 + 10 * Math.abs(Math.sin(i * 1.27))) * (p.str / 100);
+    const w = ok ? 0.65 + 0.3 * Math.abs(Math.sin(i)) : 0.28;
+    pulses.push({ c: t, amp, w });
   }
   return ages.map(age => {
     let v = 0;
-    for (const p of pulses) {
-      const d = Math.abs(age - p.c) / p.w;
-      if (d < 3) v = Math.max(v, p.a * Math.exp(-1.5 * d * d));
+    for (const px of pulses) {
+      const d = Math.abs(age - px.c) / px.w;
+      if (d < 3.5) v = Math.max(v, px.amp * Math.exp(-2 * d * d));
     }
     return v;
   });
 }
 
 function calcSerial(p, ages) {
-  const span = p.cyc * p.len;
-  const endAge = p.start + span;
-  const stepFrac = p.step / 100;
+  const MAX = 92 * (p.str / 100);
+  const steps = [];
+  let floor = 0, t = p.startAge;
+  for (let i = 0; i < p.cyc; i++) {
+    const prog = (i + 1) / p.cyc;
+    const peak = MAX * Math.pow(prog, 0.65);
+    const nextFloor = Math.max(floor, peak * 0.20 * (i + 1) / p.cyc * 1.5);
+    steps.push({
+      t0: t, t1: t + p.len * 0.3,
+      t2: t + p.len * 0.68, t3: t + p.len,
+      floor, peak, nextFloor,
+    });
+    floor = nextFloor;
+    t += p.len;
+  }
+  if (steps.length === 0) return ages.map(() => 0);
+  const last = steps[steps.length - 1];
   return ages.map(age => {
-    if (age < p.start) return 0;
-    if (age >= endAge) {
-      const extra = (age - endAge) / 15;
-      return p.peak * (0.82 + 0.08 * Math.min(extra, 1));
+    if (age < steps[0].t0) return 0;
+    if (age >= last.t3) {
+      const ex = (age - last.t3) / 10;
+      return Math.min(MAX, last.nextFloor + (last.peak - last.nextFloor) * (0.72 + 0.08 * Math.min(ex, 1)));
     }
-    const rel = age - p.start;
-    const ci = Math.floor(rel / p.len);
-    const cp = (rel % p.len) / p.len;
-    const baseline = (ci / p.cyc) * p.peak * stepFrac;
-    const cyclePeak = p.peak * ((ci + 1) / p.cyc);
-    let v;
-    if (cp < 0.14) {
-      v = baseline + cyclePeak * 0.18 * (cp / 0.14);
-    } else if (cp < 0.44) {
-      const t = (cp - 0.14) / 0.3;
-      v = baseline + cyclePeak * (0.18 + 0.82 * ss(t));
-    } else if (cp < 0.73) {
-      const wob = Math.sin(cp * 18) * cyclePeak * 0.03;
-      v = baseline + cyclePeak * 0.97 + wob;
-    } else {
-      const t = (cp - 0.73) / 0.27;
-      const nb = ((ci + 1) / p.cyc) * p.peak * stepFrac;
-      v = baseline + cyclePeak * (0.97 - 0.72 * t) + nb * t * 0.4;
+    for (const s of steps) {
+      if (age >= s.t0 && age < s.t3) {
+        if (age <= s.t1) {
+          return s.floor + (s.peak - s.floor) * smoothstep((age - s.t0) / (s.t1 - s.t0 || 1));
+        } else if (age <= s.t2) {
+          return s.peak * 0.97 + Math.sin((age - s.t1) * 5) * s.peak * 0.02;
+        } else {
+          return s.peak * 0.97 + (s.nextFloor - s.peak * 0.97) * smoothstep((age - s.t2) / (s.t3 - s.t2 || 1));
+        }
+      }
     }
-    return Math.max(0, v);
+    return 0;
   });
 }
 
 function calcAI(p, ages) {
-  const skillMult = p.skill / 100;
   return ages.map(age => {
-    if (age < p.start) return 0;
-    const t = age - p.start;
-    const sig = 1 / (1 + Math.exp(-4 * (t - 0.4)));
-    const initial = p.jump * skillMult * sig;
-    const growth = p.grow * skillMult * t * (1 + 0.04 * t);
-    return initial + growth;
+    if (age < p.startAge) return 0;
+    const t = age - p.startAge;
+    const sig = 1 / (1 + Math.exp(-5 * (t - 0.5)));
+    const initial = (p.jump / 100) * 58 * sig;
+    const growth = (p.depth / 100) * (p.grow / 10) * t * (1 + 0.03 * t);
+    return Math.min(98, initial + growth);
   });
 }
 
 function calcCapital(p, ages) {
   const r = p.rate / 100;
+  const K0 = p.init * 0.18;
+  const C = p.add * 0.06;
   return ages.map(age => {
-    if (age < p.start) return 0;
-    const t = age - p.start;
-    const cg = p.init * Math.pow(1 + r, t);
-    const ag = r > 0 ? p.add * (Math.pow(1 + r, t) - 1) / r : p.add * t;
-    return cg + ag;
+    if (age < p.startAge) return 0;
+    const t = age - p.startAge;
+    const kg = K0 * Math.pow(1 + r, t);
+    const cg = r > 0 ? C * (Math.pow(1 + r, t) - 1) / r : C * t;
+    return Math.min(100, (kg + cg) * 0.85);
   });
 }
 
-function calcComposite(data, enabled, smooth) {
-  const keys = ['employ', 'pulse', 'serial', 'ai', 'capital'];
-  const weights = { employ: 0.12, pulse: 0.18, serial: 0.28, ai: 0.22, capital: 0.20 };
+function calcAllCurves() {
+  const p = S.params;
+  const data = {
+    employ:  calcEmploy(p.employ, AGES),
+    pulse:   calcPulse(p.pulse, AGES),
+    serial:  calcSerial(p.serial, AGES),
+    ai:      calcAI(p.ai, AGES),
+    capital: calcCapital(p.capital, AGES),
+  };
+  data.composite = calcComposite(data, S.enabled);
+  return data;
+}
+
+function calcComposite(data, enabled) {
+  const W = { employ: 0.12, pulse: 0.18, serial: 0.27, ai: 0.23, capital: 0.20 };
   const raw = AGES.map((_, i) => {
     let sum = 0, wsum = 0;
-    for (const k of keys) {
-      if (enabled[k] && data[k]) {
-        sum += (data[k][i] || 0) * weights[k];
-        wsum += weights[k];
-      }
+    for (const k of Object.keys(W)) {
+      if (enabled[k] && data[k]) { sum += (data[k][i] || 0) * W[k]; wsum += W[k]; }
     }
-    return wsum > 0 ? sum / wsum * smooth : 0;
+    return wsum > 0 ? (sum / wsum) * 1.15 : 0;
   });
-  // Gaussian blur for smoothness
-  const blurred = raw.map((v, i) => {
-    const w = [0.07, 0.15, 0.23, 0.15, 0.07];
-    let s = 0, ws = 0;
-    for (let d = -2; d <= 2; d++) {
-      const idx = i + d;
-      if (idx >= 0 && idx < raw.length) {
-        s += raw[idx] * w[d + 2]; ws += w[d + 2];
-      }
+  return raw.map((v, i) => {
+    if (i === 0 || i === raw.length - 1) return v;
+    return raw[i-1] * 0.25 + v * 0.5 + raw[i+1] * 0.25;
+  });
+}
+
+function getAgeIndex(age) {
+  const idx = Math.round(age) - MIN_AGE;
+  return Math.max(0, Math.min(AGES.length - 1, idx));
+}
+
+function getCurveValueAt(curveData, age) {
+  const idx = getAgeIndex(age);
+  return curveData[idx] || 0;
+}
+
+/* ══ BULL MARKET CHECK ══════════════════════════════════════════════════════ */
+function checkBullMarket() {
+  const data = calcAllCurves();
+  const comp = data.composite;
+  const startIdx = getAgeIndex(S.currentAge);
+
+  // Find local minima after current age
+  const minima = [];
+  for (let i = startIdx + 1; i < comp.length - 1; i++) {
+    if (comp[i] < comp[i-1] && comp[i] < comp[i+1]) {
+      minima.push({ idx: i, val: comp[i] });
     }
-    return ws > 0 ? s / ws : v;
-  });
-  return blurred;
-}
-
-// ════════════════════════════════════════════════
-// CHART
-// ════════════════════════════════════════════════
-let chart, cdata = {};
-
-function buildAllData() {
-  const p = S.params;
-  cdata.employ   = calcEmploy(p.employ, AGES);
-  cdata.pulse    = calcPulse(p.pulse, AGES);
-  cdata.serial   = calcSerial(p.serial, AGES);
-  cdata.ai       = calcAI(p.ai, AGES);
-  cdata.capital  = calcCapital(p.capital, AGES);
-  cdata.composite = calcComposite(cdata, S.enabled, p.compSmooth);
-}
-
-function buildDatasets() {
-  const defs = [
-    { key: 'employ',    label: '传统就业', tension: 0.4  },
-    { key: 'pulse',     label: '创业脉冲', tension: 0.3  },
-    { key: 'serial',    label: '连续创业', tension: 0.42 },
-    { key: 'ai',        label: 'AI 协作',  tension: 0.5  },
-    { key: 'capital',   label: '资本复利', tension: 0.55 },
-    { key: 'composite', label: '复合叠加', tension: 0.45 },
-  ];
-  return defs.map(d => ({
-    label: d.label,
-    data: cdata[d.key],
-    borderColor: COLORS[d.key],
-    backgroundColor: d.key === 'composite'
-      ? `${COLORS[d.key]}10`
-      : `${COLORS[d.key]}08`,
-    borderWidth: d.key === 'composite' ? 2.5 : 1.6,
-    tension: d.tension,
-    fill: d.key === 'composite',
-    pointRadius: 0,
-    pointHoverRadius: 5,
-    pointHoverBackgroundColor: COLORS[d.key],
-    hidden: !S.enabled[d.key],
-    order: d.key === 'composite' ? 0 : 1,
-  }));
-}
-
-function initChart() {
-  const ctx = document.getElementById('chart').getContext('2d');
-
-  // Defensive plugin registration — UMD global name varies by version
-  const annotationPlugin =
-    window.ChartjsPluginAnnotation ||
-    window['chartjs-plugin-annotation'] ||
-    window.ChartAnnotation;
-  if (annotationPlugin) {
-    try { Chart.register(annotationPlugin); } catch(e) { /* already registered */ }
   }
 
-  // Annotation config — only add if plugin loaded
-  const annotationCfg = annotationPlugin ? {
-    annotations: {
-      nowLine: {
-        type: 'line',
-        xMin: S.currentAge,
-        xMax: S.currentAge,
-        borderColor: 'rgba(255,107,53,0.75)',
-        borderWidth: 1.5,
-        borderDash: [5, 4],
-        label: {
-          content: `NOW`,
-          display: true,
-          position: 'start',
-          backgroundColor: 'rgba(255,107,53,0.18)',
-          color: '#ff6b35',
-          font: { family: 'JetBrains Mono', size: 10, weight: '500' },
-          padding: { x: 7, y: 3 }
-        }
-      }
-    }
-  } : {};
+  if (minima.length < 2) return { bull: true, reason: '趋势整体向上' };
+
+  let prevMin = minima[0].val;
+  for (let i = 1; i < minima.length; i++) {
+    if (minima[i].val <= prevMin) return { bull: false, reason: '存在下行风险' };
+    prevMin = minima[i].val;
+  }
+  return { bull: true, reason: '每次低谷均高于前次' };
+}
+
+/* ══ NOW LINE PLUGIN ════════════════════════════════════════════════════════ */
+const nowLinePlugin = {
+  id: 'nowLine',
+  afterDraw(chart) {
+    const { ctx, chartArea, scales } = chart;
+    const xScale = scales.x;
+    const age = S.currentAge;
+    if (age < xScale.min || age > xScale.max) return;
+    const x = xScale.getPixelForValue(age);
+    ctx.save();
+    ctx.beginPath();
+    ctx.setLineDash([5, 4]);
+    ctx.strokeStyle = 'rgba(255, 107, 53, 0.65)';
+    ctx.lineWidth = 1.5;
+    ctx.moveTo(x, chartArea.top);
+    ctx.lineTo(x, chartArea.bottom);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(255, 107, 53, 0.85)';
+    ctx.font = '500 10px JetBrains Mono, monospace';
+    ctx.fillText('NOW', x + 5, chartArea.top + 15);
+    ctx.restore();
+  }
+};
+
+/* ══ CHART ══════════════════════════════════════════════════════════════════ */
+function initChart() {
+  Chart.register(nowLinePlugin);
+  const canvas = document.getElementById('lifeChart');
+  const ctx = canvas.getContext('2d');
+
+  // Gradient for composite fill
+  function makeCompositeGrad(chart) {
+    const { ctx, chartArea } = chart;
+    if (!chartArea) return 'transparent';
+    const g = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+    g.addColorStop(0, 'rgba(240,244,255,0.12)');
+    g.addColorStop(1, 'rgba(240,244,255,0.00)');
+    return g;
+  }
+
+  const data = calcAllCurves();
+
+  const datasets = [
+    // Composite (behind)
+    {
+      label: '综合指数',
+      data: data.composite,
+      borderColor: 'rgba(200,191,176,0.9)',
+      borderWidth: 1.5,
+      fill: true,
+      backgroundColor: 'rgba(200,191,176,0.06)',
+      tension: 0.4,
+      pointRadius: 0,
+      order: 6,
+    },
+    // Employment
+    {
+      label: '职业曲线',
+      data: data.employ,
+      borderColor: '#4a8fa8',
+      borderWidth: 1.5,
+      fill: false,
+      tension: 0.4,
+      pointRadius: 0,
+      order: 1,
+    },
+    // Pulse
+    {
+      label: '脉冲曲线',
+      data: data.pulse,
+      borderColor: '#c9614a',
+      borderWidth: 2,
+      fill: false,
+      tension: 0.2,
+      pointRadius: 0,
+      order: 2,
+    },
+    // Serial
+    {
+      label: '连续创业',
+      data: data.serial,
+      borderColor: '#5a8f6a',
+      borderWidth: 2,
+      fill: false,
+      tension: 0.35,
+      pointRadius: 0,
+      order: 3,
+    },
+    // AI
+    {
+      label: 'AI杠杆',
+      data: data.ai,
+      borderColor: '#8b62c4',
+      borderWidth: 1.5,
+      fill: false,
+      tension: 0.5,
+      pointRadius: 0,
+      order: 4,
+    },
+    // Capital
+    {
+      label: '资本曲线',
+      data: data.capital,
+      borderColor: '#b08040',
+      borderWidth: 1.5,
+      fill: false,
+      tension: 0.5,
+      pointRadius: 0,
+      order: 5,
+    },
+  ];
 
   chart = new Chart(ctx, {
     type: 'line',
-    data: { labels: AGES, datasets: buildDatasets() },
+    data: {
+      labels: AGES,
+      datasets,
+    },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      animation: { duration: 350, easing: 'easeInOutQuart' },
-      interaction: { mode: 'index', intersect: false },
+      animation: { duration: 300 },
+      interaction: {
+        mode: 'index',
+        intersect: false,
+      },
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: 'rgba(4,8,15,0.96)',
-          borderColor: '#1e3555',
-          borderWidth: 1,
-          padding: 12,
-          titleFont: { family: 'Barlow Condensed', size: 14, weight: '700' },
+          backgroundColor: 'rgba(4,8,18,0.92)',
+          titleColor: 'rgba(255,255,255,0.6)',
+          bodyColor: 'rgba(255,255,255,0.85)',
+          titleFont: { family: 'JetBrains Mono', size: 11, weight: '400' },
           bodyFont: { family: 'JetBrains Mono', size: 11 },
-          titleColor: '#dce9fd',
-          bodyColor: '#7a9dbf',
+          borderColor: 'rgba(255,255,255,0.08)',
+          borderWidth: 1,
+          padding: 10,
           callbacks: {
-            title: items => `${items[0].label} 岁`,
-            label: item => item.dataset.hidden
-              ? null
-              : ` ${item.dataset.label}  ${Math.round(item.raw)}`
+            title: ctx => `Age ${ctx[0].label}`,
+            label: ctx => ` ${ctx.dataset.label}: ${ctx.raw.toFixed(1)}`,
           }
         },
-        annotation: annotationCfg
+        nowLine: {},
       },
       scales: {
         x: {
-          grid: { color: '#0a1420', lineWidth: 1 },
+          type: 'linear',
+          min: 15,
+          max: 50,
           ticks: {
-            color: '#2d4870',
+            stepSize: 5,
+            color: 'rgba(255,255,255,0.3)',
             font: { family: 'JetBrains Mono', size: 10 },
-            maxTicksLimit: 15,
-            callback: v => `${v}`
+            callback: v => `${v}`,
           },
-          border: { color: '#162840' }
+          grid: {
+            color: '#0d1520',
+            lineWidth: 1,
+          },
+          border: { color: '#162840' },
         },
         y: {
-          grid: { color: '#0a1420', lineWidth: 1 },
+          min: 0,
+          max: 105,
           ticks: {
-            color: '#2d4870',
-            font: { family: 'JetBrains Mono', size: 10 }
+            stepSize: 20,
+            color: 'rgba(255,255,255,0.3)',
+            font: { family: 'JetBrains Mono', size: 10 },
+            callback: v => v,
           },
-          border: { color: '#162840' }
-        }
-      }
-    }
+          grid: {
+            color: '#0d1520',
+            lineWidth: 1,
+          },
+          border: { color: '#162840' },
+        },
+      },
+    },
   });
+
+  applyEnabledToChart();
 }
 
-function refreshChart() {
+function applyEnabledToChart() {
   if (!chart) return;
-  buildAllData();
-  chart.data.datasets = buildDatasets();
-  // Update annotation line if plugin is active
-  try {
-    const ann = chart.options.plugins.annotation?.annotations?.nowLine;
-    if (ann) { ann.xMin = ann.xMax = S.currentAge; }
-  } catch(e) { /* annotation plugin not available */ }
-  chart.update();
-  refreshMetrics();
+  const keyOrder = ['composite', 'employ', 'pulse', 'serial', 'ai', 'capital'];
+  chart.data.datasets.forEach((ds, i) => {
+    const key = keyOrder[i];
+    ds.hidden = !S.enabled[key];
+  });
+  chart.update('none');
 }
 
-// ════════════════════════════════════════════════
-// METRICS
-// ════════════════════════════════════════════════
-function refreshMetrics() {
-  const comp = cdata.composite || [];
-  const maxV = Math.max(...comp.filter(v => isFinite(v)), 1);
-  const ci = S.currentAge - MIN_AGE;
-  const curV = comp[ci] || 0;
-
-  // Header pills
-  document.getElementById('hdr-age').textContent = `${S.currentAge} 岁`;
-  document.getElementById('hdr-stage').textContent = STAGES[S.stage] || '—';
-  document.getElementById('hdr-composite').textContent = Math.round(curV);
-  const capIdx = S.params.capital.start - MIN_AGE;
-  const capNow = (cdata.capital || [])[ci] || 0;
-  document.getElementById('hdr-capital').textContent = Math.round(capNow);
-
-  // Bull check
-  const bull = checkBull(comp, ci);
-  const floorEl = document.getElementById('hdr-floor');
-  floorEl.textContent = bull ? '✓ 永久牛市' : '△ 未达标';
-  floorEl.className = `val ${bull ? 'ok' : 'warn'}`;
-
-  // Projections
-  const projAges = [30, 40, 50, 60, 70].filter(a => a > S.currentAge);
-  if (projAges.length < 2) projAges.unshift(S.currentAge + 5);
-  const plist = document.getElementById('proj-list');
-  plist.innerHTML = projAges.slice(0, 5).map(a => {
-    const idx = a - MIN_AGE;
-    const v = comp[idx] || 0;
-    const pct = (v / maxV * 100).toFixed(0);
-    return `<div class="proj-row">
-      <div class="proj-top">
-        <span class="proj-age">${a} 岁</span>
-        <span class="proj-val">${Math.round(v)}</span>
-      </div>
-      <div class="proj-bar"><div class="proj-fill" style="width:${pct}%"></div></div>
-    </div>`;
-  }).join('');
+function refreshChartData() {
+  if (!chart) return;
+  const data = calcAllCurves();
+  const keyOrder = ['composite', 'employ', 'pulse', 'serial', 'ai', 'capital'];
+  const dataMap = { composite: data.composite, employ: data.employ, pulse: data.pulse, serial: data.serial, ai: data.ai, capital: data.capital };
+  chart.data.datasets.forEach((ds, i) => {
+    const key = keyOrder[i];
+    ds.data = dataMap[key];
+    ds.hidden = !S.enabled[key];
+  });
+  chart.update('none');
 }
 
-function checkBull(data, upToIdx) {
-  // Check if local minima after current age are rising
-  let prevLow = -Infinity;
-  let foundLow = false;
-  for (let i = Math.max(1, upToIdx); i < data.length - 1; i++) {
-    const v = data[i];
-    if (v < data[i-1] && v < data[i+1]) {
-      if (foundLow && v < prevLow * 0.98) return false;
-      prevLow = v;
-      foundLow = true;
-    }
+function setView(v) {
+  chartView = v;
+  document.getElementById('view-focus').classList.toggle('active', v === 'focus');
+  document.getElementById('view-full').classList.toggle('active', v === 'full');
+  if (chart) {
+    chart.options.scales.x.min = 15;
+    chart.options.scales.x.max = v === 'focus' ? 50 : 80;
+    chart.update('none');
   }
-  return true;
 }
 
-// ════════════════════════════════════════════════
-// MILESTONES
-// ════════════════════════════════════════════════
-function renderMs() {
-  const list = document.getElementById('ms-list');
-  list.innerHTML = [...S.milestones]
+/* ══ PAGE SWITCHING ═════════════════════════════════════════════════════════ */
+function goPage(name) {
+  document.querySelectorAll('.page').forEach(p => {
+    p.style.display = 'none';
+    p.classList.remove('active');
+  });
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+
+  const pg = document.getElementById('page-' + name);
+  pg.style.display = '';
+  pg.classList.add('active');
+  document.querySelector(`[data-page="${name}"]`).classList.add('active');
+
+  if (name === 'curves' && !chart) { initChart(); }
+  if (name === 'curves') { setTimeout(() => chart && chart.resize(), 60); }
+  if (name === 'log') { renderLog(); }
+  if (name === 'settings') { renderSettings(); }
+
+  currentPage = name;
+}
+
+/* ══ AGE SYNC ═══════════════════════════════════════════════════════════════ */
+function setAge(val) {
+  S.currentAge = parseFloat(val);
+  persist();
+  syncAgeSliders();
+  updateTodayPage();
+  if (chart) chart.update('none'); // redraws now line
+}
+
+function syncAgeSliders() {
+  const v = S.currentAge;
+  document.getElementById('age-slider-today').value = v;
+  document.getElementById('age-slider-today-val').textContent = parseFloat(v).toFixed(1);
+  document.getElementById('age-slider-curves').value = v;
+  document.getElementById('age-slider-curves-val').textContent = parseFloat(v).toFixed(1);
+  document.getElementById('hero-age').textContent = Math.floor(v);
+  document.getElementById('nav-age-badge').textContent = `age ${parseFloat(v).toFixed(1)}`;
+}
+
+document.getElementById('age-slider-today').addEventListener('input', e => setAge(e.target.value));
+document.getElementById('age-slider-curves').addEventListener('input', e => setAge(e.target.value));
+
+/* ══ TODAY PAGE ═════════════════════════════════════════════════════════════ */
+function updateTodayPage() {
+  const age = S.currentAge;
+  // Date
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+  document.getElementById('hero-date').textContent = dateStr;
+
+  // Stage
+  const stage = STAGES[S.stage] || STAGES.explore;
+  document.getElementById('hero-stage-text').textContent = `${stage.label} · ${stage.desc}`;
+
+  // Compute all curves at current age
+  const data = calcAllCurves();
+  const vals = {};
+  CURVE_DEFS.forEach(cd => {
+    vals[cd.key] = getCurveValueAt(data[cd.key], age);
+  });
+
+  // Composite stat
+  document.getElementById('stat-composite').textContent = vals.composite.toFixed(1);
+
+  // Bull market
+  const bull = checkBullMarket();
+  document.getElementById('stat-bull').textContent = bull.bull ? '🐂 牛市' : '🐻 熊市';
+  document.getElementById('bull-icon').textContent = bull.bull ? '📈' : '📉';
+  const bullEl = document.getElementById('bull-status-text');
+  bullEl.textContent = bull.reason;
+  bullEl.className = 'bull-status ' + (bull.bull ? 'up' : 'down');
+
+  // Curve cards
+  const cc = document.getElementById('curve-cards');
+  cc.innerHTML = '';
+  CURVE_DEFS.forEach(cd => {
+    const v = vals[cd.key];
+    const pct = Math.min(100, v).toFixed(0);
+    const div = document.createElement('div');
+    div.className = 'curve-card';
+    div.innerHTML = `
+      <div class="curve-card-name">
+        <span class="curve-dot" style="background:${cd.color}"></span>
+        ${cd.label}
+      </div>
+      <div class="curve-bar-wrap">
+        <div class="curve-bar" style="width:${pct}%;background:${cd.color}44;border-right:2px solid ${cd.color};"></div>
+      </div>
+      <div class="curve-val" style="color:${cd.color}">${pct}</div>
+    `;
+    cc.appendChild(div);
+  });
+
+  // Upcoming milestones
+  const upcoming = S.milestones
+    .filter(m => !m.done && m.age >= Math.floor(age))
     .sort((a, b) => a.age - b.age)
-    .map((m, i) => `
-      <div class="ms-item">
-        <span class="ms-age">${m.age}</span>
-        <span class="ms-txt" contenteditable="true"
-          onblur="updateMs(${i}, this.textContent.trim())">${m.text}</span>
-        <button class="ms-del" onclick="removeMs(${i})">×</button>
-      </div>
-    `).join('');
-}
+    .slice(0, 4);
 
-function addMilestone() {
-  const age = parseInt(prompt('里程碑年龄（岁）', S.currentAge + 5));
-  if (!age || isNaN(age) || age < 1 || age > 120) return;
-  const text = prompt('里程碑描述', '');
-  if (!text) return;
-  S.milestones.push({ age, text });
-  renderMs(); save();
-}
-
-function removeMs(i) {
-  S.milestones.splice(i, 1);
-  renderMs(); save();
-}
-
-function updateMs(i, text) {
-  if (S.milestones[i]) { S.milestones[i].text = text; save(); }
-}
-
-// ════════════════════════════════════════════════
-// CONTROLS
-// ════════════════════════════════════════════════
-function toggleSec(id) {
-  document.getElementById(`sb-${id}`).classList.toggle('open');
-  document.getElementById(`chev-${id}`).classList.toggle('open');
-}
-
-function toggleCurve(key) {
-  S.enabled[key] = !S.enabled[key];
-  // Sidebar toggle
-  const st = document.getElementById(`tog-${key}`);
-  if (st) st.classList.toggle('on', S.enabled[key]);
-  // Bottom bar
-  const bt = document.querySelector(`[data-key="${key}"]`);
-  if (bt) bt.classList.toggle('on', S.enabled[key]);
-  refreshChart(); save();
-}
-
-// Slider binder
-function bind(slId, fvId, path, transform) {
-  const sl = document.getElementById(slId);
-  const fv = document.getElementById(fvId);
-  if (!sl) return;
-  sl.addEventListener('input', () => {
-    const raw = parseFloat(sl.value);
-    const val = transform ? transform(raw) : raw;
-    if (fv) fv.textContent = val;
-    setPath(S.params, path, val);
-    debounceUpdate();
-  });
-  // init display
-  if (fv) {
-    const raw = parseFloat(sl.value);
-    fv.textContent = transform ? transform(raw) : raw;
+  const um = document.getElementById('upcoming-milestones');
+  if (upcoming.length === 0) {
+    um.innerHTML = '<div class="empty">暂无即将到来的里程碑</div>';
+  } else {
+    um.innerHTML = '';
+    upcoming.forEach(m => {
+      const d = document.createElement('div');
+      d.className = 'milestone-item';
+      const diff = m.age - Math.floor(age);
+      d.innerHTML = `
+        <div class="milestone-age">${m.age}</div>
+        <div class="milestone-text">${escHtml(m.text)}
+          <div style="font-size:11px;color:var(--text3);margin-top:2px;">还有 ${diff} 年</div>
+        </div>
+      `;
+      um.appendChild(d);
+    });
   }
+
+  // Note
+  document.getElementById('today-note').value = S.todayNote;
 }
 
-function setPath(obj, path, val) {
-  const parts = path.split('.');
-  let cur = obj;
-  for (let i = 0; i < parts.length - 1; i++) cur = cur[parts[i]];
-  cur[parts[parts.length - 1]] = val;
+function saveNote() {
+  S.todayNote = document.getElementById('today-note').value;
+  persist();
+  toast('笔记已保存', 'success');
 }
 
-function getPath(obj, path) {
-  return path.split('.').reduce((c, k) => c?.[k], obj);
+/* ══ STAGE SELECT ═══════════════════════════════════════════════════════════ */
+document.getElementById('stage-select').addEventListener('change', e => {
+  S.stage = e.target.value;
+  persist();
+  updateTodayPage();
+});
+
+/* ══ STRENGTH PANEL ═════════════════════════════════════════════════════════ */
+function spUpdate(curve, param, val, labelId) {
+  S.params[curve][param] = val;
+  document.getElementById(labelId).textContent = val;
+  persist();
+  refreshChartData();
+  updateTodayPage();
 }
 
-let debTimer;
-function debounceUpdate() {
-  clearTimeout(debTimer);
-  debTimer = setTimeout(() => { refreshChart(); save(); }, 100);
-}
-
-function wireControls() {
-  bind('sl-maxAge',      'fv-maxAge',      'maxAge');
-
-  bind('sl-e-start',     'fv-e-start',     'employ.start');
-  bind('sl-e-peak',      'fv-e-peak',      'employ.peak');
-  bind('sl-e-retire',    'fv-e-retire',    'employ.retire');
-  bind('sl-e-val',       'fv-e-val',       'employ.val');
-
-  bind('sl-p-start',     'fv-p-start',     'pulse.start');
-  bind('sl-p-cnt',       'fv-p-cnt',       'pulse.cnt');
-  bind('sl-p-rate',      'fv-p-rate',      'pulse.rate');
-  bind('sl-p-amp',       'fv-p-amp',       'pulse.amp');
-
-  bind('sl-s-start',     'fv-s-start',     'serial.start');
-  bind('sl-s-cyc',       'fv-s-cyc',       'serial.cyc');
-  bind('sl-s-len',       'fv-s-len',       'serial.len');
-  bind('sl-s-peak',      'fv-s-peak',      'serial.peak');
-  bind('sl-s-step',      'fv-s-step',      'serial.step');
-
-  bind('sl-a-start',     'fv-a-start',     'ai.start');
-  bind('sl-a-jump',      'fv-a-jump',      'ai.jump');
-  bind('sl-a-grow',      'fv-a-grow',      'ai.grow');
-  bind('sl-a-skill',     'fv-a-skill',     'ai.skill');
-
-  bind('sl-k-start',     'fv-k-start',     'capital.start');
-  bind('sl-k-init',      'fv-k-init',      'capital.init');
-  bind('sl-k-rate',      'fv-k-rate',      'capital.rate');
-  bind('sl-k-add',       'fv-k-add',       'capital.add');
-
-  bind('sl-comp-smooth', 'fv-comp-smooth', 'compSmooth', v => (v / 10).toFixed(1));
-
-  // Age slider
-  const ageSl = document.getElementById('age-sl');
-  const ageNum = document.getElementById('age-num');
-  ageSl.addEventListener('input', () => {
-    S.currentAge = parseInt(ageSl.value);
-    ageNum.innerHTML = `${S.currentAge}<sup>岁</sup>`;
-    refreshChart(); save();
-  });
-
-  // Stage
-  document.getElementById('stage-sel').addEventListener('change', e => {
-    S.stage = e.target.value;
-    refreshMetrics(); save();
-  });
-
-  // Notes
-  document.getElementById('notes').addEventListener('input', e => {
-    S.notes = e.target.value; save();
+/* ══ CURVE PILLS ════════════════════════════════════════════════════════════ */
+function renderPills() {
+  const container = document.getElementById('curve-pills');
+  container.innerHTML = '';
+  CURVE_DEFS.forEach(cd => {
+    const btn = document.createElement('button');
+    btn.className = 'curve-pill' + (S.enabled[cd.key] ? ' active' : '');
+    btn.innerHTML = `<span class="curve-pill-dot" style="background:${cd.color}${S.enabled[cd.key] ? '' : '44'}"></span>${cd.label}`;
+    btn.onclick = () => {
+      S.enabled[cd.key] = !S.enabled[cd.key];
+      persist();
+      renderPills();
+      refreshChartData();
+      updateTodayPage();
+    };
+    container.appendChild(btn);
   });
 }
 
-// ════════════════════════════════════════════════
-// APPLY STATE TO UI
-// ════════════════════════════════════════════════
-function applyState() {
-  // Age
-  document.getElementById('age-sl').value = S.currentAge;
-  document.getElementById('age-num').innerHTML = `${S.currentAge}<sup>岁</sup>`;
-
-  // Stage
-  document.getElementById('stage-sel').value = S.stage;
-
-  // Notes
-  document.getElementById('notes').value = S.notes || '';
-
-  // Sliders
-  const sliderMap = {
-    'sl-maxAge':      'maxAge',
-    'sl-e-start':     'employ.start',
-    'sl-e-peak':      'employ.peak',
-    'sl-e-retire':    'employ.retire',
-    'sl-e-val':       'employ.val',
-    'sl-p-start':     'pulse.start',
-    'sl-p-cnt':       'pulse.cnt',
-    'sl-p-rate':      'pulse.rate',
-    'sl-p-amp':       'pulse.amp',
-    'sl-s-start':     'serial.start',
-    'sl-s-cyc':       'serial.cyc',
-    'sl-s-len':       'serial.len',
-    'sl-s-peak':      'serial.peak',
-    'sl-s-step':      'serial.step',
-    'sl-a-start':     'ai.start',
-    'sl-a-jump':      'ai.jump',
-    'sl-a-grow':      'ai.grow',
-    'sl-a-skill':     'ai.skill',
-    'sl-k-start':     'capital.start',
-    'sl-k-init':      'capital.init',
-    'sl-k-rate':      'capital.rate',
-    'sl-k-add':       'capital.add',
+/* ══ JOURNAL ════════════════════════════════════════════════════════════════ */
+function addJournal() {
+  const text = document.getElementById('journal-input').value.trim();
+  if (!text) { toast('请输入日志内容', 'error'); return; }
+  const entry = {
+    date: new Date().toISOString(),
+    age: parseFloat(S.currentAge.toFixed(1)),
+    text,
   };
-  for (const [id, path] of Object.entries(sliderMap)) {
-    const el = document.getElementById(id);
-    if (el) {
-      const val = getPath(S.params, path);
-      if (val !== undefined) el.value = val;
-    }
-  }
-  // compSmooth: stored as float but slider is *10
-  const csSl = document.getElementById('sl-comp-smooth');
-  if (csSl) csSl.value = Math.round((S.params.compSmooth || 3.0) * 10);
-
-  // Fv labels - re-trigger displays via slider read
-  Object.entries(sliderMap).forEach(([id, path]) => {
-    const sl = document.getElementById(id);
-    const fvId = 'fv-' + id.replace('sl-', '');
-    const fv = document.getElementById(fvId);
-    if (sl && fv) fv.textContent = sl.value;
-  });
-  const fvSmooth = document.getElementById('fv-comp-smooth');
-  if (fvSmooth) fvSmooth.textContent = (S.params.compSmooth || 3.0).toFixed(1);
-
-  // Toggles
-  for (const [key, on] of Object.entries(S.enabled)) {
-    const st = document.getElementById(`tog-${key}`);
-    if (st) st.classList.toggle('on', on);
-    const bt = document.querySelector(`[data-key="${key}"]`);
-    if (bt) bt.classList.toggle('on', on);
-  }
-
-  renderMs();
+  S.journal.unshift(entry);
+  persist();
+  document.getElementById('journal-input').value = '';
+  renderJournal();
+  toast('日志已添加', 'success');
 }
 
-// ════════════════════════════════════════════════
-// PERSISTENCE
-// ════════════════════════════════════════════════
-function save() {
-  localStorage.setItem('lc_state', JSON.stringify(S));
+function deleteJournal(idx) {
+  S.journal.splice(idx, 1);
+  persist();
+  renderJournal();
 }
 
-function load() {
-  try {
-    const raw = localStorage.getItem('lc_state');
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      S = deepMerge(deepClone(DEFAULTS), parsed);
-    }
-  } catch (e) { /* ignore */ }
-}
-
-// ════════════════════════════════════════════════
-// SNAPSHOTS
-// ════════════════════════════════════════════════
-function saveSnapshot() {
-  const snaps = JSON.parse(localStorage.getItem('lc_snaps') || '[]');
-  snaps.unshift({
-    date: new Date().toLocaleString('zh-CN'),
-    age: S.currentAge,
-    stage: STAGES[S.stage] || S.stage,
-    notes: S.notes,
-    state: deepClone(S)
-  });
-  if (snaps.length > 30) snaps.length = 30;
-  localStorage.setItem('lc_snaps', JSON.stringify(snaps));
-  showToast('快照已保存');
-}
-
-function showSnapshots() {
-  const modal = document.getElementById('snap-modal');
-  modal.style.display = 'flex';
-  const snaps = JSON.parse(localStorage.getItem('lc_snaps') || '[]');
-  const list = document.getElementById('snap-list');
-  const empty = document.getElementById('snap-empty');
-  if (!snaps.length) {
-    list.innerHTML = '';
-    empty.style.display = 'block';
+function renderJournal() {
+  const list = document.getElementById('journal-list');
+  if (S.journal.length === 0) {
+    list.innerHTML = '<div class="empty">暂无日志记录，开始记录你的旅程</div>';
     return;
   }
-  empty.style.display = 'none';
-  list.innerHTML = snaps.map((s, i) => `
-    <div style="background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;padding:12px">
-      <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:6px">
-        <div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--t2)">${s.date}</div>
-          <div style="font-size:12px;color:var(--t1);margin-top:3px">${s.age}岁 · ${s.stage}</div>
-        </div>
-        <div style="display:flex;gap:6px">
-          <button class="btn" onclick="loadSnapshot(${i})" style="font-size:11px;padding:3px 8px">恢复</button>
-          <button class="btn" onclick="deleteSnapshot(${i})" style="font-size:11px;padding:3px 8px;color:var(--rose)">删除</button>
+  list.innerHTML = '';
+  S.journal.forEach((e, i) => {
+    const d = new Date(e.date);
+    const dateStr = d.toLocaleDateString('zh-CN', { year: 'numeric', month: 'short', day: 'numeric' });
+    const div = document.createElement('div');
+    div.className = 'journal-entry';
+    div.innerHTML = `
+      <div class="journal-entry-header">
+        <span class="journal-date">${dateStr}</span>
+        <span class="journal-age-badge">age ${e.age}</span>
+        <button class="journal-del" onclick="deleteJournal(${i})">删除</button>
+      </div>
+      <div class="journal-text">${escHtml(e.text)}</div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+/* ══ MILESTONES ═════════════════════════════════════════════════════════════ */
+function addMilestone() {
+  const age = parseInt(document.getElementById('ms-age-input').value);
+  const text = document.getElementById('ms-text-input').value.trim();
+  if (isNaN(age) || age < 15 || age > 85) { toast('请输入有效年龄 (15-85)', 'error'); return; }
+  if (!text) { toast('请输入里程碑内容', 'error'); return; }
+  S.milestones.push({ age, text, done: false, note: '' });
+  S.milestones.sort((a, b) => a.age - b.age);
+  persist();
+  document.getElementById('ms-age-input').value = '';
+  document.getElementById('ms-text-input').value = '';
+  renderTimeline();
+  updateTodayPage();
+  toast('里程碑已添加', 'success');
+}
+
+function toggleMilestone(idx) {
+  S.milestones[idx].done = !S.milestones[idx].done;
+  persist();
+  renderTimeline();
+  updateTodayPage();
+}
+
+function deleteMilestone(idx) {
+  S.milestones.splice(idx, 1);
+  persist();
+  renderTimeline();
+  updateTodayPage();
+}
+
+function renderTimeline() {
+  const tl = document.getElementById('milestone-timeline');
+  if (S.milestones.length === 0) {
+    tl.innerHTML = '<div class="empty">暂无里程碑</div>';
+    return;
+  }
+  tl.innerHTML = '';
+  S.milestones.forEach((m, i) => {
+    const isPast = m.age < S.currentAge;
+    const div = document.createElement('div');
+    div.className = 'timeline-item' + (m.done ? ' done' : '') + (isPast ? ' past' : '');
+    div.innerHTML = `
+      <div class="timeline-dot-wrap">
+        <div class="timeline-dot"></div>
+        <div class="timeline-age">${m.age}</div>
+      </div>
+      <div class="timeline-content">
+        <div class="timeline-text">${escHtml(m.text)}</div>
+        ${m.note ? `<div class="timeline-note">${escHtml(m.note)}</div>` : ''}
+        <div class="timeline-actions">
+          <button class="btn btn-ghost btn-xs" onclick="toggleMilestone(${i})">${m.done ? '↩ 撤销' : '✓ 完成'}</button>
+          <button class="btn btn-ghost btn-xs" style="color:#c64;" onclick="deleteMilestone(${i})">删除</button>
         </div>
       </div>
-      ${s.notes ? `<div style="font-size:11px;color:var(--t2);border-top:1px solid var(--bd);padding-top:6px;margin-top:6px;line-height:1.5">${s.notes.slice(0,100)}${s.notes.length>100?'...':''}</div>` : ''}
-    </div>
-  `).join('');
+    `;
+    tl.appendChild(div);
+  });
 }
 
-function loadSnapshot(i) {
-  const snaps = JSON.parse(localStorage.getItem('lc_snaps') || '[]');
-  if (snaps[i]) {
-    S = deepMerge(deepClone(DEFAULTS), snaps[i].state);
-    applyState();
-    refreshChart();
-    save();
-    document.getElementById('snap-modal').style.display = 'none';
-    showToast('快照已恢复');
-  }
+function renderLog() {
+  renderJournal();
+  renderTimeline();
 }
 
-function deleteSnapshot(i) {
-  const snaps = JSON.parse(localStorage.getItem('lc_snaps') || '[]');
-  snaps.splice(i, 1);
-  localStorage.setItem('lc_snaps', JSON.stringify(snaps));
-  showSnapshots();
+/* ══ SETTINGS ═══════════════════════════════════════════════════════════════ */
+function renderSettings() {
+  renderAccordions();
+  renderSnapshots();
 }
 
-// ════════════════════════════════════════════════
-// EXPORT / IMPORT
-// ════════════════════════════════════════════════
-function exportData() {
-  const data = {
-    version: '1.0',
-    exportedAt: new Date().toISOString(),
-    state: S,
-    snapshots: JSON.parse(localStorage.getItem('lc_snaps') || '[]')
+function renderAccordions() {
+  const container = document.getElementById('settings-accordions');
+  container.innerHTML = '';
+
+  const curveDefs = CURVE_DEFS.filter(cd => cd.key !== 'composite');
+
+  curveDefs.forEach(cd => {
+    const meta = PARAM_META[cd.key];
+    const params = S.params[cd.key];
+
+    const acc = document.createElement('div');
+    acc.className = 'accordion';
+    acc.id = `acc-${cd.key}`;
+
+    acc.innerHTML = `
+      <div class="accordion-head" onclick="toggleAcc('${cd.key}')">
+        <span class="accordion-color" style="background:${cd.color}"></span>
+        <span class="accordion-name">${cd.label}</span>
+        <span style="font-size:11px;font-family:var(--font-mono);color:var(--text3);">${cd.labelEn}</span>
+        <span class="accordion-arrow">▼</span>
+      </div>
+      <div class="accordion-body">
+        <div class="param-grid" id="params-${cd.key}"></div>
+      </div>
+    `;
+    container.appendChild(acc);
+
+    const grid = acc.querySelector(`#params-${cd.key}`);
+    meta.forEach(pm => {
+      const item = document.createElement('div');
+      item.className = 'param-item';
+      const valId = `pv-${cd.key}-${pm.key}`;
+      item.innerHTML = `
+        <div class="param-header">
+          <span class="param-name">${pm.label}</span>
+          <span class="param-val" id="${valId}">${params[pm.key]}</span>
+        </div>
+        <input type="range" min="${pm.min}" max="${pm.max}" step="${pm.step}"
+               value="${params[pm.key]}"
+               oninput="updateParam('${cd.key}','${pm.key}',+this.value,'${valId}')">
+      `;
+      grid.appendChild(item);
+    });
+  });
+}
+
+function toggleAcc(key) {
+  const el = document.getElementById(`acc-${key}`);
+  el.classList.toggle('open');
+}
+
+function updateParam(curve, param, val, labelId) {
+  S.params[curve][param] = val;
+  document.getElementById(labelId).textContent = val;
+
+  // Sync strength panel if relevant
+  const spMap = {
+    'employ-str': ['sp-employ-val', 'sp-employ input'],
+    'pulse-str':  ['sp-pulse-val',  'sp-pulse input'],
+    'serial-str': ['sp-serial-val', 'sp-serial input'],
+    'ai-depth':   ['sp-ai-val',     'sp-ai input'],
+    'capital-rate':['sp-capital-val','sp-capital input'],
   };
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const mk = `${curve}-${param}`;
+  if (spMap[mk]) {
+    const [labelEl, sliderSel] = spMap[mk];
+    const lbl = document.getElementById(labelEl);
+    if (lbl) lbl.textContent = val;
+    const sl = document.querySelector(`.strength-panel #sp-${curve} input`);
+    if (sl) sl.value = val;
+  }
+
+  persist();
+  refreshChartData();
+  updateTodayPage();
+}
+
+/* ══ SNAPSHOTS ══════════════════════════════════════════════════════════════ */
+function saveSnapshot() {
+  const name = document.getElementById('snapshot-name-input').value.trim() || `快照 ${S.snapshots.length + 1}`;
+  const snap = {
+    id: Date.now(),
+    name,
+    date: new Date().toISOString(),
+    params: JSON.parse(JSON.stringify(S.params)),
+    enabled: { ...S.enabled },
+    currentAge: S.currentAge,
+    stage: S.stage,
+  };
+  S.snapshots.unshift(snap);
+  if (S.snapshots.length > 10) S.snapshots.pop();
+  persist();
+  document.getElementById('snapshot-name-input').value = '';
+  renderSnapshots();
+  toast(`快照"${name}"已保存`, 'success');
+}
+
+function loadSnapshot(id) {
+  const snap = S.snapshots.find(s => s.id === id);
+  if (!snap) return;
+  S.params = JSON.parse(JSON.stringify(snap.params));
+  S.enabled = { ...snap.enabled };
+  S.currentAge = snap.currentAge;
+  S.stage = snap.stage;
+  persist();
+  syncAgeSliders();
+  updateTodayPage();
+  renderSettings();
+  renderPills();
+  refreshChartData();
+  toast(`已恢复快照"${snap.name}"`, 'success');
+}
+
+function deleteSnapshot(id) {
+  S.snapshots = S.snapshots.filter(s => s.id !== id);
+  persist();
+  renderSnapshots();
+}
+
+function renderSnapshots() {
+  const list = document.getElementById('snapshot-list');
+  if (!S.snapshots || S.snapshots.length === 0) {
+    list.innerHTML = '<div class="empty" style="padding:16px 0;">暂无快照</div>';
+    return;
+  }
+  list.innerHTML = '';
+  S.snapshots.forEach(snap => {
+    const d = new Date(snap.date);
+    const dateStr = d.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const item = document.createElement('div');
+    item.className = 'snapshot-item';
+    item.innerHTML = `
+      <div class="snapshot-meta">
+        <div class="snapshot-name">${escHtml(snap.name)}</div>
+        <div class="snapshot-date">${dateStr} · age ${snap.currentAge}</div>
+      </div>
+      <button class="btn btn-secondary btn-xs" onclick="loadSnapshot(${snap.id})">恢复</button>
+      <button class="btn btn-ghost btn-xs" style="color:#c64;" onclick="deleteSnapshot(${snap.id})">删</button>
+    `;
+    list.appendChild(item);
+  });
+}
+
+/* ══ EXPORT / IMPORT ════════════════════════════════════════════════════════ */
+function exportJSON() {
+  const blob = new Blob([JSON.stringify(S, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `life-curve-${new Date().toISOString().slice(0, 10)}.json`;
+  a.download = `life_picture_${new Date().toISOString().slice(0,10)}.json`;
   a.click();
   URL.revokeObjectURL(url);
+  toast('已导出 JSON 文件', 'success');
 }
 
-function importData() {
-  const inp = document.createElement('input');
-  inp.type = 'file'; inp.accept = '.json';
-  inp.onchange = e => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => {
-      try {
-        const data = JSON.parse(ev.target.result);
-        if (data.state) {
-          S = deepMerge(deepClone(DEFAULTS), data.state);
-        } else {
-          S = deepMerge(deepClone(DEFAULTS), data);
-        }
-        if (data.snapshots) {
-          localStorage.setItem('lc_snaps', JSON.stringify(data.snapshots));
-        }
-        applyState();
-        refreshChart();
-        save();
-        showToast('数据导入成功');
-      } catch (err) {
-        alert('文件解析失败，请检查格式');
-      }
-    };
-    reader.readAsText(file);
+function importJSON() {
+  document.getElementById('import-file').click();
+}
+
+function handleImport(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const parsed = JSON.parse(ev.target.result);
+      S = deepMerge(DEFAULTS(), parsed);
+      persist();
+      syncAgeSliders();
+      updateTodayPage();
+      renderPills();
+      refreshChartData();
+      if (currentPage === 'settings') renderSettings();
+      if (currentPage === 'log') renderLog();
+      toast('数据导入成功', 'success');
+    } catch(err) {
+      toast('导入失败：文件格式错误', 'error');
+    }
   };
-  inp.click();
+  reader.readAsText(file);
+  e.target.value = '';
 }
 
 function resetAll() {
-  if (!confirm('确认重置所有设置和数据？')) return;
-  S = deepClone(DEFAULTS);
-  applyState();
-  refreshChart();
-  save();
+  if (!confirm('确定要重置所有数据为默认值吗？')) return;
+  S = DEFAULTS();
+  persist();
+  syncAgeSliders();
+  updateTodayPage();
+  renderPills();
+  refreshChartData();
+  if (currentPage === 'settings') renderSettings();
+  if (currentPage === 'log') renderLog();
+  toast('已重置为默认设置', 'success');
 }
 
-// ════════════════════════════════════════════════
-// UTILS
-// ════════════════════════════════════════════════
-function deepClone(obj) {
-  return JSON.parse(JSON.stringify(obj));
+/* ══ TOAST ══════════════════════════════════════════════════════════════════ */
+function toast(msg, type = '') {
+  const container = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = 'toast' + (type ? ' ' + type : '');
+  el.textContent = msg;
+  container.appendChild(el);
+  setTimeout(() => {
+    el.style.animation = 'toast-out 0.25s ease forwards';
+    setTimeout(() => el.remove(), 280);
+  }, 2400);
 }
 
-function deepMerge(target, source) {
-  const result = { ...target };
-  for (const key of Object.keys(source)) {
-    if (source[key] !== null && typeof source[key] === 'object' && !Array.isArray(source[key])) {
-      result[key] = deepMerge(target[key] || {}, source[key]);
-    } else {
-      result[key] = source[key];
-    }
-  }
-  return result;
+/* ══ UTIL ═══════════════════════════════════════════════════════════════════ */
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
-let toastTimer;
-function showToast(msg) {
-  let t = document.getElementById('toast');
-  if (!t) {
-    t = document.createElement('div');
-    t.id = 'toast';
-    t.style.cssText = `
-      position:fixed;bottom:24px;right:24px;z-index:200;
-      background:var(--bg3);border:1px solid var(--bd2);
-      color:var(--green);padding:10px 18px;border-radius:8px;
-      font-family:'Barlow Condensed',sans-serif;font-size:13px;
-      font-weight:600;letter-spacing:.5px;
-      transition:opacity .3s;
-    `;
-    document.body.appendChild(t);
-  }
-  t.textContent = msg;
-  t.style.opacity = '1';
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { t.style.opacity = '0'; }, 2200);
+/* ══ INIT ═══════════════════════════════════════════════════════════════════ */
+function init() {
+  loadSaved();
+  syncAgeSliders();
+  document.getElementById('stage-select').value = S.stage;
+  document.getElementById('today-note').value = S.todayNote;
+
+  // Sync strength panel initial values
+  document.querySelector('#page-curves .strength-panel #sp-employ input').value = S.params.employ.str;
+  document.getElementById('sp-employ-val').textContent = S.params.employ.str;
+  document.querySelector('#page-curves .strength-panel #sp-pulse input').value = S.params.pulse.str;
+  document.getElementById('sp-pulse-val').textContent = S.params.pulse.str;
+  document.querySelector('#page-curves .strength-panel #sp-serial input').value = S.params.serial.str;
+  document.getElementById('sp-serial-val').textContent = S.params.serial.str;
+  document.querySelector('#page-curves .strength-panel #sp-ai input').value = S.params.ai.depth;
+  document.getElementById('sp-ai-val').textContent = S.params.ai.depth;
+  document.querySelector('#page-curves .strength-panel #sp-capital input').value = S.params.capital.rate;
+  document.getElementById('sp-capital-val').textContent = S.params.capital.rate;
+
+  renderPills();
+  updateTodayPage();
+
+  // Show today page
+  goPage('today');
 }
 
-// Close modal on backdrop click
-document.getElementById('snap-modal').addEventListener('click', function(e) {
-  if (e.target === this) this.style.display = 'none';
-});
-
-// ════════════════════════════════════════════════
-// INIT
-// ════════════════════════════════════════════════
-document.addEventListener('DOMContentLoaded', () => {
-  load();
-  applyState();
-  buildAllData();
-  initChart();
-  wireControls();
-  refreshChart();
-});
+init();
 </script>
 </body>
 </html>
